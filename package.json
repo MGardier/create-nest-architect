@@ -1,0 +1,24 @@
+{
+  "name": "create-nest-architect",
+  "version": "1.0.0",
+  "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice",
+  "main": "index.js",
+  "bin": {
+    "my-nest-cli": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "npx tsx src/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "@types/prompts": "^2.4.9",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "prompts": "^2.4.2"
+  }
+}
