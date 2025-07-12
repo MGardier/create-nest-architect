@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 import chalk from "../node_modules/chalk/source/index";
-import { DB_LANGUAGE } from "./constant/constant";
+import { DB_LANGUAGE, ODM_TYPE, ORM_TYPE } from "./constant/constant";
+import { ConfigChoiceInterface } from "./interfaces/configChoice.interface";
 import { UtilPrompt } from "./utils/prompt.util";
 
-const main = async (): Promise<void> => {
+const collectProjectConfig = async (): Promise<ConfigChoiceInterface> => {
   /********************** PROJECT NAME  ******************************** */
   const projectName = await UtilPrompt.askProjectNameIfNeeded();
   if (!projectName) {
@@ -19,7 +20,6 @@ const main = async (): Promise<void> => {
   }
 
   /********************** DB LANGUAGE  ******************************** */
-
   const dbLanguage = await UtilPrompt.askDbLanguage();
   if (!dbLanguage) {
     console.error(chalk.red("❌ You must choose an architecture."));
@@ -27,8 +27,7 @@ const main = async (): Promise<void> => {
   }
 
   /********************** ORM or ODM  ******************************** */
-
-  let ormOrOdm: string =
+  let ormOrOdm: ORM_TYPE | ODM_TYPE =
     dbLanguage === DB_LANGUAGE.NOSQL
       ? await UtilPrompt.askOdm()
       : await UtilPrompt.askOrm();
@@ -37,10 +36,20 @@ const main = async (): Promise<void> => {
     console.error(chalk.red("❌ You must choose an Orm or Odm ."));
     process.exit(1);
   }
-  console.log("projectname => ", projectName);
-  console.log("architectureName => ", architectureName);
-  console.log("dbLanguage => ", dbLanguage);
-  console.log("ormOrOdm => ", ormOrOdm);
+
+  return {
+    projectName,
+    architectureName,
+    dbLanguage,
+    ormOrOdm,
+  }
 };
 
-main();
+
+async function setUpProject() {
+  const configChoice: ConfigChoiceInterface = await collectProjectConfig();
+  console.log(configChoice);
+}
+
+setUpProject();
+
