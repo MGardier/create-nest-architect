@@ -2,7 +2,7 @@ import { ARCHITECTURE_TYPE, DB_LANGUAGE, ODM_TYPE, ORM_TYPE } from "../constant/
 
 export interface ConfigChoiceInterface {
     projectName: string;
-    architectureName: ARCHITECTURE_TYPE;
+    architectureType: ARCHITECTURE_TYPE;
     dbLanguage: DB_LANGUAGE;
     ormOrOdm: ODM_TYPE | ORM_TYPE;
 }
