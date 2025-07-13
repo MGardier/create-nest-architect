@@ -15,6 +15,7 @@ export const setUpProject = async () => {
   const targetDir = resolve(process.cwd(), configChoice.projectName);
   console.log(targetDir);
   
+  const exec = promisify(execCb);
   await exec(`npm install prisma @prisma/client && npx prisma init`, {
     cwd: targetDir,
     shell: true ,
