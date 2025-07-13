@@ -1,4 +1,3 @@
-import { exec } from "child_process";
 import {
   ARCHITECTURE_TYPE,
   Constant,
@@ -10,9 +9,11 @@ import {
 import { PromptUtil } from "../utils/prompt.util";
 import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
+import { promisify } from "util";
+import { exec as execCb } from "child_process";
 
 export abstract class InitProject {
-  static async cloneRepo(configChoice: ConfigChoice) {
+  static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
     const templates: Record<string, string> = Constant.REPO_TEMPLATE;
     const templateRepo: string =
       configChoice.architectureType === ARCHITECTURE_TYPE.CLEAN
@@ -20,16 +21,25 @@ export abstract class InitProject {
         : templates.featured;
     const projectName: string = configChoice.projectName;
 
-    exec(
-      `git clone --depth 1 --branch main ${templateRepo} ${projectName}`,
-      (err, stdout, stderr) => {
-        if (err) {
-          MessageUtil.error(`Error: ${stderr}`);
-          process.exit(1);
-        }
-        MessageUtil.success(`Project created successfully in ${projectName}`);
-      }
-    );
+    const exec = promisify(execCb);
+
+    try {
+      const { stdout, stderr } = await exec(
+        `git clone --depth 1 --branch main ${templateRepo} ${projectName}`
+        // (err, stderr) => {
+        //   if (err) {
+        //     MessageUtil.error(`Error: ${stderr}`);
+        //     process.exit(1);
+        //   }
+        //   MessageUtil.success(`Project created successfully in ${projectName}`);
+        // }
+      );
+      console.log(stdout);
+      if (stderr) console.error(stderr);
+      console.log("Clonage terminé avec succès !");
+    } catch (err) {
+      console.error("Erreur lors de l'installation Prisma :", err);
+    }
   }
 
   static async collectProjectConfig(): Promise<ConfigChoice> {
@@ -69,5 +79,18 @@ export abstract class InitProject {
       dbLanguage,
       ormOrOdm
     );
+  }
+
+  static async setUpPrisma(configChoice: ConfigChoice) {
+    if (configChoice.isArchitectureTypeClean()) {
+    } else {
+      //executer npm i prisma
+      // installer client prisma : npm install @prisma/client
+      //executer prisma init : npx prisma  init
+      //Créer prisma service + prisma module
+      //ajout db url .env.example
+    }
+    //prisma sevice, schema prisma , prisma module ,.env.example avec db url
+    //traitement prisma
   }
 }
