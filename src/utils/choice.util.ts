@@ -6,9 +6,9 @@ import {
   DB_LANGUAGE,
   ODM_TYPE,
   ORM_TYPE,
-} from "../constant/constant";
+} from "../constants/constant";
 
-export class ChoiceUtil {
+export abstract class ChoiceUtil {
   static getArchitectureChoices(): AskChoiceInterface[] {
     const clean: AskChoiceInterface = {
       title: Constant.getKeyDisplay(ARCHITECTURE_TYPE.CLEAN),

@@ -1,11 +1,16 @@
 import prompts, { PromptType } from "prompts";
 import { AskChoiceInterface } from "../interfaces/askChoice.interface";
-import { ARCHITECTURE_TYPE, DB_LANGUAGE, ODM_TYPE, ORM_TYPE } from "../constant/constant";
+import {
+  ARCHITECTURE_TYPE,
+  DB_LANGUAGE,
+  ODM_TYPE,
+  ORM_TYPE,
+} from "../constants/constant";
 import { ChoiceUtil } from "./choice.util";
 
 /************************ GENERIC METHODS ***********************************/
 
-export class UtilPrompt {
+export abstract class PromptUtil {
   static async askUser(
     question: string,
     type: PromptType,
@@ -16,7 +21,7 @@ export class UtilPrompt {
       message: question,
       name: field,
     });
-
+    console.log();
     return answer;
   }
 
@@ -32,7 +37,7 @@ export class UtilPrompt {
       name: field,
       choices,
     });
-
+    console.log();
     return answer;
   }
 
@@ -41,12 +46,13 @@ export class UtilPrompt {
     let projectName = process.argv[2];
     if (!projectName) {
       const { answer } = await this.askUser(
-        "🧙 Please specify a project name",
+        "Please specify a project name",
         "text",
         "answer"
       );
       projectName = answer;
     }
+    console.log();
     return projectName;
   }
 
@@ -54,7 +60,7 @@ export class UtilPrompt {
   static async askArchitecture(): Promise<ARCHITECTURE_TYPE> {
     const choices: AskChoiceInterface[] = ChoiceUtil.getArchitectureChoices();
     const { answer } = await this.askUserWithChoices(
-      `🧙 Choose your project architecture:`,
+      `Choose your project architecture:`,
       choices,
       "select",
       "answer"
@@ -67,11 +73,12 @@ export class UtilPrompt {
   static async askDbLanguage(): Promise<DB_LANGUAGE> {
     const choices: AskChoiceInterface[] = ChoiceUtil.getDbLanguageChoices();
     const { answer } = await this.askUserWithChoices(
-      "🧙 Select the database type for your project:",
+      "Select the database type for your project:",
       choices,
       "select",
       "answer"
     );
+    console.log();
     return answer as DB_LANGUAGE;
   }
 
@@ -79,11 +86,12 @@ export class UtilPrompt {
   static async askOrm(): Promise<ORM_TYPE> {
     const choices: AskChoiceInterface[] = ChoiceUtil.getOrmChoices();
     const { answer } = await this.askUserWithChoices(
-      "🧙 Which ORM would you like to set up?",
+      "Which ORM would you like to set up?",
       choices,
       "select",
       "answer"
     );
+    console.log();
     return answer as ORM_TYPE;
   }
 
@@ -91,11 +99,12 @@ export class UtilPrompt {
   static async askOdm(): Promise<ODM_TYPE> {
     const choices: AskChoiceInterface[] = ChoiceUtil.getOdmChoices();
     const { answer } = await this.askUserWithChoices(
-      "🧙 Which ODM would you like to set up?",
+      "Which ODM would you like to set up?",
       choices,
       "select",
       "answer"
     );
+    console.log();
     return answer as ODM_TYPE;
   }
 }
