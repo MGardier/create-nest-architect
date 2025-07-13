@@ -1,16 +1,12 @@
 #!/usr/bin/env node
 
-import chalk from "../node_modules/chalk/source/index";
-import { UtilPrompt } from "./utils/prompt.util";
+import { ConfigChoice } from "./classes/configChoice.class";
+import { InitProject } from "./scripts/initProject";
 
-const main = async () => {
-  /********************** PROJECT NAME  ******************************** */
-  const projectName = await UtilPrompt.askProjectNameIfNeeded();
-  if (!projectName) {
-    console.error(chalk.red("❌ You must specify a name to create project."));
-    process.exit(1);
-  }
-  /********************** ARCHITECTURE  ******************************** */
+export const setUpProject = async () => {
+  const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
+  console.log(configChoice);
+  InitProject.cloneRepo(configChoice);
 };
 
-main();
+setUpProject();
