@@ -18,30 +18,21 @@ export enum ORM_TYPE {
 export enum ODM_TYPE {
   MONGOOSE = "MONGOOSE",
 }
+export enum TEMPLATE_PATH {
+  PRISMA_SERVICE = "prisma/prisma.service.ts.template",
+  PRISMA_MODULE = "prisma/prisma.module.ts.template",
+  ENV_EXAMPLE = '.env.example.template'
+}
+
+
+export enum REPO_TEMPLATE_URL {
+  CLEAN = "https://github.com/MGardier/create-nest-architect-template-clean.git",
+
+  FEATURED = "https://github.com/MGardier/create-nest-architect-template-featured.git",
+
+}
 
 export abstract class Constant {
-  static REPO_TEMPLATE: Record<string, string> = {
-    clean:
-      "https://github.com/MGardier/create-nest-architect-template-clean.git",
-    featured:
-      "https://github.com/MGardier/create-nest-architect-template-featured.git",
-  };
-
-
-  //changer
-  static FILE_TEMPLATE: {
-    prisma: {
-      prismaService: "prisma/prisma.service.ts",
-      prismaModule: "prisma/prisma.module.ts",
-      appModule: "app.module.ts",
-      envExample: ".env.example",
-    }
-
-
-  };
-
-
-
 
   static getKeyDisplay(key: string): string {
     switch (key) {
@@ -62,14 +53,6 @@ export abstract class Constant {
     }
   }
 
-  // static getDir(key: string): string {
-  //   switch (key) {
-  //     case ARCHITECTURE_TYPE.CLEAN:
-  //       return "clean";
-  //     default:
-  //       return "featured";
-  //   }
-  // }
 
 
 }

@@ -22,12 +22,16 @@ export abstract class FsUtil {
     MessageUtil.success(`File created at: ${targetFile}`);
   }
 
+  static async updateFile(filePath:string, regex: string, addContent: string ){
+
+  }
+
+  
+
   static async getFileContent(filePath: string): Promise<string> {
     return await fs.readFile(filePath, 'utf-8');
   }
 
-  static getFileTemplatePath(architectureType: ARCHITECTURE_TYPE, templatePath: string): string {
-    return `${process.cwd}/filesTemplates/${Constant.getDir(architectureType)}/${templatePath}`
-  }
+
 
 }

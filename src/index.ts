@@ -2,10 +2,7 @@
 
 import { ConfigChoice } from "./classes/configChoice.class";
 import { InitProject } from "./scripts/initProject";
-import { resolve } from "path";
-import { stderr } from "process";
-import { promisify } from "util";
-import { exec as execCb } from "child_process";
+
 
 export const setUpProject = async () => {
   const configChoice: ConfigChoice = await InitProject.collectProjectConfig();

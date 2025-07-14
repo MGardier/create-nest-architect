@@ -4,6 +4,9 @@ import {
   DB_LANGUAGE,
   ODM_TYPE,
   ORM_TYPE,
+  REPO_TEMPLATE_URL,
+
+  TEMPLATE_PATH,
 } from "../constants/constant";
 import { promises as fs } from "fs";
 import { PromptUtil } from "../utils/prompt.util";
@@ -17,11 +20,10 @@ import { readFile } from "fs/promises";
 
 export abstract class InitProject {
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
-    const templates: Record<string, string> = Constant.REPO_TEMPLATE;
     const templateRepo: string =
       configChoice.architectureType === ARCHITECTURE_TYPE.CLEAN
-        ? templates.clean
-        : templates.featured;
+        ? REPO_TEMPLATE_URL.CLEAN
+        : REPO_TEMPLATE_URL.FEATURED;
     const projectName: string = configChoice.projectName;
 
     const exec = promisify(execCb);
@@ -29,19 +31,14 @@ export abstract class InitProject {
     try {
       const { stdout, stderr } = await exec(
         `git clone --depth 1 --branch main ${templateRepo} ${projectName}`
-        // (err, stderr) => {
-        //   if (err) {
-        //     MessageUtil.error(`Error: ${stderr}`);
-        //     process.exit(1);
-        //   }
-        //   MessageUtil.success(`Project created successfully in ${projectName}`);
-        // }
       );
-      console.log(stdout);
-      if (stderr) console.error(stderr);
+      MessageUtil.info(stdout);
+      if (stderr) MessageUtil.info(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-      throw new Error("An error append when try to git clone template .");
+        MessageUtil.error("An error append when try to git clone template .");
+      process.exit(1);
+      
 
     }
   }
@@ -87,37 +84,66 @@ export abstract class InitProject {
 
   static async setUpPrisma(configChoice: ConfigChoice) {
     const targetDir = resolve(process.cwd(), configChoice.projectName);
-
-    if (configChoice.isArchitectureTypeClean()) {
+    
+    if (configChoice.isArchitectureTypeClean()) 
+    {
     } else {
-      //executer npm i prisma
-      // installer client prisma : npm install @prisma/client
-      //executer prisma init : npx prisma  init
-      const targetDir = resolve(process.cwd(), configChoice.projectName);
+
       const exec = promisify(execCb);
-      console.log('Installing Prisma...');
+      MessageUtil.info('Installing Prisma...');
       await exec(`npm install prisma @prisma/client && npx prisma init`, {
         cwd: targetDir,
         shell: "/bin/bash"
       });
-      console.log(MessageUtil.success('Prisma successfully installed'));
+      MessageUtil.success('Prisma successfully installed');
 
 
       //Créer prisma service + prisma module
       const prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
-      const moduleTemplatePath = resolve(__dirname, '../templates/prisma/prisma.module.ts.template');
-      const serviceTemplatePath = resolve(__dirname, '../templates/prisma/prisma.service.ts.template');
 
-      const prismaModuleContent = await readFile(moduleTemplatePath, 'utf-8');
-      console.log(`Generating prisma.module in ${prismaDir}...`);
+      /** get Content of template file   */
+       const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
+       const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
+       const envExampleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.ENV_EXAMPLE}`));
+
+       /** get Content of existing file of new project  */
+       let appModuleContent = await FsUtil.getFileContent(resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`));
+
+      
+
+       MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
       await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, prismaModuleContent);
 
-      const prismaServiceContent = await readFile(serviceTemplatePath, 'utf-8');
-      console.log(`Generating prisma.service in ${prismaDir}...`);
+
+      MessageUtil.info(`Generating prisma.service in ${prismaDir}...`);
       await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
 
-      //ajout db url .env.example
+
+
+      MessageUtil.info(`Generating .env.example in ${envExampleContent}...`);
+      await FsUtil.createFile(`.env.example`, envExampleContent);
+
+      MessageUtil.info(`Updating app.module.ts in ${envExampleContent}...`);
+      const moduleDecoratorRegex = /@Module\s*\(\s*\{([^}]+)\}\s*\)/s;
+
+      // a générer dynamiquement
+      const importPrismaModule =  "import { PrismaModule } from 'prisma/prisma.module"
+      appModuleContent = importPrismaModule +appModuleContent ;
+
+      const prismaModule = "PrismaModule,"
+       const match = appModuleContent.match(moduleDecoratorRegex);
+       //console.log(match[1])
+
+      //Ajout Import
+   
+
+      //Récupérer le contenu du app.module 
+      // le modifier 
+      // l'enregistrer
+
     }
+
+
     //prisma sevice, schema prisma , prisma module ,.env.example avec db url
     //traitement prisma
   }
