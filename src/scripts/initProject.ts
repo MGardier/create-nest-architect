@@ -5,7 +5,7 @@ import {
   ODM_TYPE,
   ORM_TYPE,
 } from "../constants/constant";
-
+import { promises as fs } from "fs";
 import { PromptUtil } from "../utils/prompt.util";
 import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
@@ -41,7 +41,8 @@ export abstract class InitProject {
       if (stderr) console.error(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-      console.error("Erreur lors de l'installation Prisma :", err);
+      throw new Error("An error append when try to git clone template .");
+
     }
   }
 
@@ -85,6 +86,8 @@ export abstract class InitProject {
   }
 
   static async setUpPrisma(configChoice: ConfigChoice) {
+    const targetDir = resolve(process.cwd(), configChoice.projectName);
+
     if (configChoice.isArchitectureTypeClean()) {
     } else {
       //executer npm i prisma
@@ -99,7 +102,7 @@ export abstract class InitProject {
       });
       console.log(MessageUtil.success('Prisma successfully installed'));
 
-      
+
       //Créer prisma service + prisma module
       const prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
       const moduleTemplatePath = resolve(__dirname, '../templates/prisma/prisma.module.ts.template');

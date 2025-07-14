@@ -1,4 +1,7 @@
+
+import { promises as fs } from "fs";
 export enum ARCHITECTURE_TYPE {
+
   FEATURED = "FEATURED",
   CLEAN = "CLEAN",
 }
@@ -24,6 +27,22 @@ export abstract class Constant {
       "https://github.com/MGardier/create-nest-architect-template-featured.git",
   };
 
+
+  //changer
+  static FILE_TEMPLATE: {
+    prisma: {
+      prismaService: "prisma/prisma.service.ts",
+      prismaModule: "prisma/prisma.module.ts",
+      appModule: "app.module.ts",
+      envExample: ".env.example",
+    }
+
+
+  };
+
+
+
+
   static getKeyDisplay(key: string): string {
     switch (key) {
       case ARCHITECTURE_TYPE.CLEAN:
@@ -42,4 +61,15 @@ export abstract class Constant {
         return key;
     }
   }
+
+  // static getDir(key: string): string {
+  //   switch (key) {
+  //     case ARCHITECTURE_TYPE.CLEAN:
+  //       return "clean";
+  //     default:
+  //       return "featured";
+  //   }
+  // }
+
+
 }
