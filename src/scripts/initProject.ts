@@ -36,9 +36,9 @@ export abstract class InitProject {
       if (stderr) MessageUtil.info(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-        MessageUtil.error("An error append when try to git clone template .");
+      MessageUtil.error("An error append when try to git clone template .");
       process.exit(1);
-      
+
 
     }
   }
@@ -84,9 +84,8 @@ export abstract class InitProject {
 
   static async setUpPrisma(configChoice: ConfigChoice) {
     const targetDir = resolve(process.cwd(), configChoice.projectName);
-    
-    if (configChoice.isArchitectureTypeClean()) 
-    {
+
+    if (configChoice.isArchitectureTypeClean()) {
     } else {
 
       const exec = promisify(execCb);
@@ -102,16 +101,16 @@ export abstract class InitProject {
       const prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
 
       /** get Content of template file   */
-       const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
-       const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
-       const envExampleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.ENV_EXAMPLE}`));
+      const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
+      const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
+      const envExampleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.ENV_EXAMPLE}`));
 
-       /** get Content of existing file of new project  */
-       let appModuleContent = await FsUtil.getFileContent(resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`));
+      /** get Content of existing file of new project  */
+      let appModuleContent = await FsUtil.getFileContent(resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`));
 
-      
 
-       MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
+
+      MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
       await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, prismaModuleContent);
 
 
@@ -127,19 +126,44 @@ export abstract class InitProject {
       const moduleDecoratorRegex = /@Module\s*\(\s*\{([^}]+)\}\s*\)/s;
 
       // a générer dynamiquement
-      const importPrismaModule =  "import { PrismaModule } from 'prisma/prisma.module"
-      appModuleContent = importPrismaModule +appModuleContent ;
-
+      const importPrismaModule = "import { PrismaModule } from 'prisma/prisma.module"
       const prismaModule = "PrismaModule,"
-       const match = appModuleContent.match(moduleDecoratorRegex);
-       //console.log(match[1])
 
-      //Ajout Import
-   
+
+     
+
+      const matchContent = appModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
+
+      if (!matchContent) {
+        MessageUtil.error(`An error append when updating app.module.ts .`);
+        process.exit(1)
+      }
+
+      //Add prisma import 
+      appModuleContent = `${importPrismaModule} \n${appModuleContent}` 
+
+      const currentImports = matchContent[1].trim();
+      
+      //add module in imports
+      const newImports =`${currentImports},\n    ${prismaModule}`
+        ;
+
+      //Replace imports in app module content
+      appModuleContent =  appModuleContent.replace(
+        /imports\s*:\s*\[(.*?)\]/s,
+        `imports: [\n    ${newImports}\n  ]`
+      );
+     
+      //Update app.module.ts
+      await FsUtil.createFile(resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`), appModuleContent);
+
+
+    
 
       //Récupérer le contenu du app.module 
       // le modifier 
       // l'enregistrer
+
 
     }
 
@@ -148,3 +172,5 @@ export abstract class InitProject {
     //traitement prisma
   }
 }
+
+

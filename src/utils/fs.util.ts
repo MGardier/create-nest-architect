@@ -21,14 +21,8 @@ export abstract class FsUtil {
     await fs.writeFile(targetFile, content, "utf8");
     MessageUtil.success(`File created at: ${targetFile}`);
   }
-
-  static async updateFile(filePath:string, regex: string, addContent: string ){
-
-  }
-
   
-
-  static async getFileContent(filePath: string): Promise<string> {
+    static async getFileContent(filePath: string): Promise<string> {
     return await fs.readFile(filePath, 'utf-8');
   }
 
