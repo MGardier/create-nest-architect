@@ -13,6 +13,7 @@ import { promisify } from "util";
 import { exec as execCb } from "child_process";
 import { resolve } from "path";
 import { FsUtil } from "../utils/fs.util";
+import { readFile } from "fs/promises";
 
 export abstract class InitProject {
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
@@ -101,11 +102,16 @@ export abstract class InitProject {
       
       //Créer prisma service + prisma module
       const prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
-      console.log(`Generating prisma.module in ${prismaDir}...`);
-      await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, '');
+      const moduleTemplatePath = resolve(__dirname, '../templates/prisma/prisma.module.ts.template');
+      const serviceTemplatePath = resolve(__dirname, '../templates/prisma/prisma.service.ts.template');
 
+      const prismaModuleContent = await readFile(moduleTemplatePath, 'utf-8');
+      console.log(`Generating prisma.module in ${prismaDir}...`);
+      await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, prismaModuleContent);
+
+      const prismaServiceContent = await readFile(serviceTemplatePath, 'utf-8');
       console.log(`Generating prisma.service in ${prismaDir}...`);
-      await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, '');
+      await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
 
       //ajout db url .env.example
     }
