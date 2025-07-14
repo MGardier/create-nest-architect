@@ -11,6 +11,8 @@ import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
+import { resolve } from "path";
+import { FsUtil } from "../utils/fs.util";
 
 export abstract class InitProject {
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
@@ -36,7 +38,7 @@ export abstract class InitProject {
       );
       console.log(stdout);
       if (stderr) console.error(stderr);
-      console.log("Clonage terminé avec succès !");
+      MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
       console.error("Erreur lors de l'installation Prisma :", err);
     }
@@ -87,7 +89,24 @@ export abstract class InitProject {
       //executer npm i prisma
       // installer client prisma : npm install @prisma/client
       //executer prisma init : npx prisma  init
+      const targetDir = resolve(process.cwd(), configChoice.projectName);
+      const exec = promisify(execCb);
+      console.log('Installing Prisma...');
+      await exec(`npm install prisma @prisma/client && npx prisma init`, {
+        cwd: targetDir,
+        shell: "/bin/bash"
+      });
+      console.log(MessageUtil.success('Prisma successfully installed'));
+
+      
       //Créer prisma service + prisma module
+      const prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
+      console.log(`Generating prisma.module in ${prismaDir}...`);
+      await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, '');
+
+      console.log(`Generating prisma.service in ${prismaDir}...`);
+      await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, '');
+
       //ajout db url .env.example
     }
     //prisma sevice, schema prisma , prisma module ,.env.example avec db url
