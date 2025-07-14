@@ -18,7 +18,8 @@ export const setUpProject = async () => {
   const exec = promisify(execCb);
   await exec(`npm install prisma @prisma/client && npx prisma init`, {
     cwd: targetDir,
-    shell: true ,
+    //shell: true ,
+    shell: "/bin/bash"
   });
 };
 
