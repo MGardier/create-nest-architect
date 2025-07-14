@@ -17,6 +17,7 @@ import { exec as execCb } from "child_process";
 import { resolve } from "path";
 import { FsUtil } from "../utils/fs.util";
 import { readFile } from "fs/promises";
+import { SetUpPrismaClean } from "../temp/setUpPrismaClean";
 
 export abstract class InitProject {
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
@@ -84,8 +85,10 @@ export abstract class InitProject {
 
   static async setUpPrisma(configChoice: ConfigChoice) {
     const targetDir = resolve(process.cwd(), configChoice.projectName);
-
-    if (configChoice.isArchitectureTypeClean()) {
+    
+    if (configChoice.isArchitectureTypeClean()) 
+    {
+      SetUpPrismaClean.exec(targetDir, configChoice);
     } else {
 
       const exec = promisify(execCb);
