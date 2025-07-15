@@ -89,7 +89,8 @@ export abstract class InitProject {
     if (configChoice.isArchitectureTypeClean()) 
     {
       SetUpPrismaClean.exec(targetDir, configChoice);
-    } else {
+    } 
+    else {
 
       const exec = promisify(execCb);
       MessageUtil.info('Installing Prisma...');
@@ -98,6 +99,7 @@ export abstract class InitProject {
         shell: "/bin/bash"
       });
       MessageUtil.success('Prisma successfully installed');
+
 
 
       //Créer prisma service + prisma module
@@ -126,7 +128,6 @@ export abstract class InitProject {
       await FsUtil.createFile(`.env.example`, envExampleContent);
 
       MessageUtil.info(`Updating app.module.ts in ${envExampleContent}...`);
-      const moduleDecoratorRegex = /@Module\s*\(\s*\{([^}]+)\}\s*\)/s;
 
       // a générer dynamiquement
       const importPrismaModule = "import { PrismaModule } from 'prisma/prisma.module"
@@ -159,21 +160,37 @@ export abstract class InitProject {
      
       //Update app.module.ts
       await FsUtil.createFile(resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`), appModuleContent);
+    }
+  }
 
 
+  static async setUpMongoose(configChoice: ConfigChoice) {
+    const targetDir = resolve(process.cwd(), configChoice.projectName);
     
+    if (configChoice.isArchitectureTypeClean()) 
+    {
+      
+    } 
+    else {
 
-      //Récupérer le contenu du app.module 
-      // le modifier 
-      // l'enregistrer
+      const exec = promisify(execCb);
+      MessageUtil.info('Installing Mongoose...');
+      await exec(`npm i @nestjs/mongoose mongoose`, {
+        cwd: targetDir,
+        shell: "/bin/bash"
+      });
+      MessageUtil.success('Mongoose successfully installed');
 
+      //Ajouter une ligne au app.module.ts
+      //un example d'entité pour le product  
+      //un example de module pour 
+      //Docker compose 
 
     }
-
-
-    //prisma sevice, schema prisma , prisma module ,.env.example avec db url
-    //traitement prisma
   }
+
+
+
 }
 
 
