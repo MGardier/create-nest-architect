@@ -111,7 +111,7 @@ export abstract class SetUpPrisma {
         }
 
         //Add prisma import 
-        appModuleContent = `import { PrismaModule } from 'prisma/prisma.module \n${appModuleContent}`
+        appModuleContent = `import { PrismaModule } from 'prisma/prisma.module \n${appModuleContent}'`
 
         const currentImports = matchContent[1].trim();
 
