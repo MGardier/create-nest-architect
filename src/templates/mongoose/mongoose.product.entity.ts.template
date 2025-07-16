@@ -1,0 +1,28 @@
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Types } from "mongoose";
+
+
+export type ProductDocument = Product & Document;
+
+
+@Schema({ timestamps: true, versionKey: false })
+export class Product {
+
+    @Prop({ required: true })
+    id: number;
+    
+    @Prop({ required: true })
+    name: string;
+
+    @Prop()
+    externalPriceId: string | null;
+
+    @Prop()
+    externalProductId: string | null;
+
+    @Prop({ required: true })
+    quantity: number;
+
+}
+
+export const ProductSchema = SchemaFactory.createForClass(Product);
