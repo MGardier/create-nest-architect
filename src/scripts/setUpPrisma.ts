@@ -19,7 +19,6 @@ export abstract class SetUpPrisma {
 
         await this.installPrisma(targetDir);
         
-
         if (configChoice.isArchitectureTypeClean()) {
           await this.setUpPrismaClean(targetDir, configChoice);
         }
@@ -107,8 +106,8 @@ export abstract class SetUpPrisma {
         const matchContent = appModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
 
         if (!matchContent) {
-        MessageUtil.error(`An error append when updating app.module.ts .`);
-        process.exit(1)
+            MessageUtil.error(`An error append when updating app.module.ts .`);
+            process.exit(1)
         }
 
         //Add prisma import 
@@ -117,24 +116,20 @@ export abstract class SetUpPrisma {
         const currentImports = matchContent[1].trim();
 
         //add module in imports
-        const newImports = `${currentImports},\n    PrismaModule,`
-        ;
+        const newImports = `${currentImports},\n    PrismaModule,`;
 
         //Replace imports in app module content
         appModuleContent = appModuleContent.replace(
         /imports\s*:\s*\[(.*?)\]/s,
         `imports: [\n    ${newImports}\n  ]`
         );
-    
+
         // TODO; app.module en erreur de compile
        
         await FsUtil.createFile(appModulePath, appModuleContent);
    
-
-
         this.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
-        
-
+    
     }
   
     static  async installPrisma(targetDir: string){
@@ -152,12 +147,11 @@ export abstract class SetUpPrisma {
         const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
         let envExampleContent = await FsUtil.getFileContent(envExamplePath);
         if (!envExampleContent.includes( `${key}=`)) {
-                    envExampleContent += `\n${key}="${value}"\n`;
-                    await FsUtil.createFile(envExamplePath, envExampleContent);
-                    MessageUtil.success( `Added ${key} to .env.example`);
-                } else {
-                    MessageUtil.info(`${key} already exists in .env.example`);
-                }
+            envExampleContent += `\n${key}="${value}"\n`;
+            await FsUtil.createFile(envExamplePath, envExampleContent);
+            MessageUtil.success( `Added ${key} to .env.example`);
+        } else {
+            MessageUtil.info(`${key} already exists in .env.example`);
+        }
     }
-
 }
