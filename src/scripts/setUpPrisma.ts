@@ -9,26 +9,27 @@ import { promises as fs } from "fs";
 
 export abstract class SetUpPrisma {
 
+    //Todo : Sortir les choses génériques 
+    //Todo : v2 tester et gestions des erreurs
+    // Todo : rajouter des comportements à exec 
+    //TODO: Rajouter des commentaires séparateur 
+
     static async exec(configChoice: ConfigChoice) {
         const targetDir = resolve(process.cwd(), configChoice.projectName);
-    
+
+        await this.installPrisma(targetDir);
+        
+
         if (configChoice.isArchitectureTypeClean()) {
           await this.setUpPrismaClean(targetDir, configChoice);
         }
         else {
-          await this.setUpPrismaLayered(targetDir, configChoice);
+          await this.setUpPrismaFeatured(targetDir, configChoice);
         }
     }
 
     static async setUpPrismaClean(targetDir: string, configChoice: ConfigChoice) {
         const exec = promisify(execCb);
-        MessageUtil.info('Installing Prisma...');
-        await exec(`npm install prisma @prisma/client && npx prisma init`, {
-            cwd: targetDir,
-            shell: "/bin/bash"
-        });
-        MessageUtil.success('Prisma successfully installed');
-
         MessageUtil.info('Moving Prisma...');
         await exec(`mkdir -p src/infrastructure/repositories/prisma/.config && mv prisma/* src/infrastructure/repositories/prisma/.config && rmdir prisma`, {
             cwd: targetDir,
@@ -78,32 +79,12 @@ export abstract class SetUpPrisma {
         await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2)); // indentation
         MessageUtil.success('Added prisma.schema path to package.json');
 
-        // ajout dans env.example
-        const envExamplePath = resolve(process.cwd(), `${configChoice.projectName}/.env.example`);
-        let envExampleContent = await FsUtil.getFileContent(envExamplePath);
-
-        // Ajoute la variable si elle n'existe pas déjà (précaution)
-        if (!envExampleContent.includes('DATABASE_URL=')) {
-            envExampleContent += `\nDATABASE_URL="provider://user:password@host:port/database"\n`;
-            await FsUtil.createFile(envExamplePath, envExampleContent);
-            MessageUtil.success('Added DATABASE_URL to .env.example');
-        } else {
-            MessageUtil.info('DATABASE_URL already exists in .env.example');
-        }
+        this.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
     }
 
-    static async setUpPrismaLayered(targetDir: string, configChoice: ConfigChoice) {
+      static async setUpPrismaFeatured(targetDir: string, configChoice: ConfigChoice) {
     
         let prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
-    
-        //Install and init prisma 
-        const exec = promisify(execCb);
-        MessageUtil.info('Installing Prisma...');
-        await exec(`npm install prisma @prisma/client && npx prisma init`, {
-            cwd: targetDir,
-            shell: "/bin/bash"
-        });
-        MessageUtil.success('Prisma successfully installed');
     
         //Get content of templates
         const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
@@ -111,9 +92,7 @@ export abstract class SetUpPrisma {
     
         const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
         const prismaServicePath = `${prismaDir}/prisma.service.ts`;
-    
-        let envExampleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.ENV_EXAMPLE}`));
-        const envExamplePath = `.env.example`;
+
     
         const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
         let appModuleContent = await FsUtil.getFileContent(resolve(process.cwd(), appModulePath));
@@ -148,17 +127,37 @@ export abstract class SetUpPrisma {
         );
     
         // TODO; app.module en erreur de compile
-        //Update app.module.ts
+       
         await FsUtil.createFile(appModulePath, appModuleContent);
    
-        // TODO: .env.example non créé
-        // Ajoute la variable si elle n'existe pas déjà (précaution)
-        if (!envExampleContent.includes('DATABASE_URL=')) {
-            envExampleContent += `\nDATABASE_URL="provider://user:password@host:port/database"\n`;
-            await FsUtil.createFile(envExamplePath, envExampleContent);
-            MessageUtil.success('Added DATABASE_URL to .env.example');
-        } 
+
+
+        this.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
         
+
+    }
+  
+    static  async installPrisma(targetDir: string){
+    
+        const exec = promisify(execCb);
+        MessageUtil.info('Installing Prisma...');
+        await exec(`npm install prisma @prisma/client && npx prisma init`, {
+            cwd: targetDir,
+            shell: "/bin/bash"
+        });
+        MessageUtil.success('Prisma successfully installed');
+    }
+
+    static  async updateEnvExampleIfNeeded(projectName: string, key:string , value: string,){
+        const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
+        let envExampleContent = await FsUtil.getFileContent(envExamplePath);
+        if (!envExampleContent.includes( `${key}=`)) {
+                    envExampleContent += `\n${key}="${value}"\n`;
+                    await FsUtil.createFile(envExamplePath, envExampleContent);
+                    MessageUtil.success( `Added ${key} to .env.example`);
+                } else {
+                    MessageUtil.info(`${key} already exists in .env.example`);
+                }
     }
 
 }

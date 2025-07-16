@@ -16,7 +16,7 @@ export const setUpProject = async () => {
     }
     
     case ODM_TYPE.MONGOOSE : {
-      InitProject.setUpMongoose(configChoice);
+     // InitProject.setUpMongoose(configChoice);
       break;
     }
   }
