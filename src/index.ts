@@ -3,6 +3,7 @@
 import { ConfigChoice } from "./classes/configChoice.class";
 import { ODM_TYPE, ORM_TYPE } from "./constants/constant";
 import { InitProject } from "./scripts/initProject";
+import { SetUpMongoose } from "./scripts/setUpMongoose";
 import { SetUpPrisma } from "./scripts/setUpPrisma";
 
 
@@ -16,13 +17,13 @@ export const setUpProject = async () => {
     }
     
     case ODM_TYPE.MONGOOSE : {
-     // InitProject.setUpMongoose(configChoice);
+      await SetUpMongoose.exec(configChoice);
       break;
     }
   }
  
   //TODO:  config service à ajouter
-  //TODO:  Choix du Docker 
+
 
 };
 

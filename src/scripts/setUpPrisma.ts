@@ -144,6 +144,7 @@ export abstract class SetUpPrisma {
     }
 
     static  async updateEnvExampleIfNeeded(projectName: string, key:string , value: string,){
+        
         const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
         let envExampleContent = await FsUtil.getFileContent(envExamplePath);
         if (!envExampleContent.includes( `${key}=`)) {

@@ -26,8 +26,9 @@ export abstract class SetUpMongoose {
     static async setUpMongooseFeatured(targetDir: string, configChoice: ConfigChoice) {
         const appModulePath : string = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
         let appModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), appModulePath));
+        const exampleDbUrl : string = "'mongodb://username:password@host:port/db?authSource=admin'";
 
-        const moogooseImportModule: string  = 'MongooseModule.forRoot(env.DATABASE_URL || "mongodb://username:password@host:port/db?authSource=admin"),'
+        const mongooseImportModule: string  =  `MongooseModule.forRoot(env.DATABASE_URL || ${exampleDbUrl})` 
           
         const matchContent = appModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
 
@@ -42,7 +43,7 @@ export abstract class SetUpMongoose {
         const currentImports = matchContent[1].trim();
 
         //add module in imports
-        const newImports = `${currentImports},\n    PrismaModule,`;
+        const newImports = `${currentImports},\n    ${mongooseImportModule},`;
 
         //Replace imports in app module content
         appModuleContent = appModuleContent.replace(
@@ -50,7 +51,7 @@ export abstract class SetUpMongoose {
         `imports: [\n    ${newImports}\n  ]`
         );
         
-
+        await FsUtil.createFile(appModulePath, appModuleContent);
         //Ajouter une ligne au app.module.ts
         //un example d'entité pour le product  
         //un example de module pour product
