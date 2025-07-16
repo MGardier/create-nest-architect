@@ -3,6 +3,7 @@
 import { ConfigChoice } from "./classes/configChoice.class";
 import { ODM_TYPE, ORM_TYPE } from "./constants/constant";
 import { InitProject } from "./scripts/initProject";
+import { SetUpPrisma } from "./scripts/setUpPrisma";
 
 
 export const setUpProject = async () => {
@@ -10,8 +11,7 @@ export const setUpProject = async () => {
   await InitProject.cloneRepo(configChoice);
   switch(configChoice.ormOrOdm){
     case ORM_TYPE.PRISMA :{
-      //InitProject.setUpPrismaMerge(configChoice);
-      InitProject.setUpPrisma(configChoice);
+      await SetUpPrisma.exec(configChoice);
       break;
     }
     
