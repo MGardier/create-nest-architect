@@ -150,18 +150,7 @@ export abstract class SetUpPrisma {
         // TODO; app.module en erreur de compile
         //Update app.module.ts
         await FsUtil.createFile(appModulePath, appModuleContent);
-    
-        const packageJsonPath = join(targetDir, 'package.json');
-        const packageJsonContent = await FsUtil.getFileContent(packageJsonPath);
-        const packageJson = JSON.parse(packageJsonContent);
-    
-        packageJson.prisma = {
-            schema: configChoice.isArchitectureTypeClean() ? "src/infrastructure/repositories/prisma/.config/schema.prisma" : "prisma/.config/schema.prisma",
-        };
-    
-        await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2)); 
-        MessageUtil.success('Added prisma.schema path to package.json');
-    
+   
         // TODO: .env.example non créé
         // Ajoute la variable si elle n'existe pas déjà (précaution)
         if (!envExampleContent.includes('DATABASE_URL=')) {

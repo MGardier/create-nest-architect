@@ -95,8 +95,8 @@ export abstract class InitProject {
 
       //Ajouter une ligne au app.module.ts
       //un example d'entité pour le product  
-      //un example de module pour 
-      //Docker compose 
+      //un example de module pour product
+     
 
     }
   }

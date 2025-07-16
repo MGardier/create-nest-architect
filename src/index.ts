@@ -21,6 +21,8 @@ export const setUpProject = async () => {
     }
   }
  
+  //TODO:  config service à ajouter
+  //TODO:  Choix du Docker 
 
 };
 
