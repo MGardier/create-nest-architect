@@ -10,7 +10,8 @@ export const setUpProject = async () => {
   await InitProject.cloneRepo(configChoice);
   switch(configChoice.ormOrOdm){
     case ORM_TYPE.PRISMA :{
-      InitProject.setUpPrismaMerge(configChoice);
+      //InitProject.setUpPrismaMerge(configChoice);
+      InitProject.setUpPrisma(configChoice);
       break;
     }
     

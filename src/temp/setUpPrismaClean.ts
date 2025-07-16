@@ -42,12 +42,14 @@ export abstract class SetUpPrismaClean {
         // ajout dans app.module
         appModuleContent = appModuleContent.replace(
             /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
-            `$1 import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module';`
+            `$1 
+            import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module';`
         );
 
         appModuleContent = appModuleContent.replace(
             /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
-            `$1 PrismaModule,`
+            `$1 
+            PrismaModule,`
         );
 
         await FsUtil.createFile(appModulePath, appModuleContent);
