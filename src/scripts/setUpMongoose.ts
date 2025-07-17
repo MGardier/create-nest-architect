@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { exec as execCb } from "child_process";
 import { MessageUtil } from "../utils/message.util";
 import { FsUtil } from "../utils/fs.util";
+import { TEMPLATE_PATH } from "../constants/constant";
 
 export abstract class SetUpMongoose {
 
@@ -19,9 +20,39 @@ export abstract class SetUpMongoose {
     }
 
     static async setUpMongooseClean(targetDir: string, configChoice: ConfigChoice) {
-    
-        
+        const mongooseDir = resolve(process.cwd(), `${configChoice.projectName}/src/infrastructure/repositories/mongoose/`);
+
+        MessageUtil.info(`Creating Mongoose config folder in ${mongooseDir}...`);
+        await FsUtil.createDirectory(mongooseDir);
+
+        const mongooseModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.MONGOOSE_MODULE}`));
+        await FsUtil.createFile(`${mongooseDir}/mongoose.module.ts`, mongooseModuleContent);
+        MessageUtil.success(`mongoose.module.ts generated`);
+
+        await FsUtil.createDirectory(`${mongooseDir}/schemas`);
+        const mongooseEntityContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.MONGOOSE_ENTITY}`));
+        await FsUtil.createFile(`${mongooseDir}/schemas/product.entity.ts`, mongooseEntityContent);
+        MessageUtil.success(`mongoose.product.entity.ts generated`);
+ 
+        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
+        let appModuleContent = await FsUtil.getFileContent(appModulePath);
+
+        appModuleContent = appModuleContent.replace(
+            /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
+            `$1\n            import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module';`
+        );
+
+        appModuleContent = appModuleContent.replace(
+            /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
+            `$1\n            MongooseModule,`
+        );
+
+        await FsUtil.createFile(appModulePath, appModuleContent);
+        MessageUtil.success(`MongooseModule correctly imported and registered in AppModule`);
+
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "MONGODB_URI", "mongodb://username:password@host:port/db?authSource=admin");
     }
+
 
     static async setUpMongooseFeatured(targetDir: string, configChoice: ConfigChoice) {
         const appModulePath : string = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);

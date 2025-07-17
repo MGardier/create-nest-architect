@@ -22,8 +22,20 @@ export abstract class FsUtil {
     MessageUtil.success(`File created at: ${targetFile}`);
   }
   
-    static async getFileContent(filePath: string): Promise<string> {
+  static async getFileContent(filePath: string): Promise<string> {
     return await fs.readFile(filePath, 'utf-8');
+  }
+
+  static  async updateEnvExampleIfNeeded(projectName: string, key:string , value: string,){   
+    const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
+    let envExampleContent = await FsUtil.getFileContent(envExamplePath);
+    if (!envExampleContent.includes( `${key}=`)) {
+        envExampleContent += `\n${key}="${value}"\n`;
+        await FsUtil.createFile(envExamplePath, envExampleContent);
+        MessageUtil.success( `Added ${key} to .env.example`);
+    } else {
+        MessageUtil.info(`${key} already exists in .env.example`);
+    }
   }
 
 

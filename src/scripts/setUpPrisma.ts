@@ -78,7 +78,7 @@ export abstract class SetUpPrisma {
         await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2)); // indentation
         MessageUtil.success('Added prisma.schema path to package.json');
 
-        this.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
     }
 
       static async setUpPrismaFeatured(targetDir: string, configChoice: ConfigChoice) {
@@ -128,7 +128,7 @@ export abstract class SetUpPrisma {
        
         await FsUtil.createFile(appModulePath, appModuleContent);
    
-        this.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
     
     }
   
@@ -141,18 +141,5 @@ export abstract class SetUpPrisma {
             shell: "/bin/bash"
         });
         MessageUtil.success('Prisma successfully installed');
-    }
-
-    static  async updateEnvExampleIfNeeded(projectName: string, key:string , value: string,){
-        
-        const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
-        let envExampleContent = await FsUtil.getFileContent(envExamplePath);
-        if (!envExampleContent.includes( `${key}=`)) {
-            envExampleContent += `\n${key}="${value}"\n`;
-            await FsUtil.createFile(envExamplePath, envExampleContent);
-            MessageUtil.success( `Added ${key} to .env.example`);
-        } else {
-            MessageUtil.info(`${key} already exists in .env.example`);
-        }
     }
 }
