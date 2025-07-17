@@ -14,7 +14,7 @@ export abstract class SetUpPrisma {
     // Todo : rajouter des comportements à exec 
     //TODO: Rajouter des commentaires séparateur 
 
-    static async exec(configChoice: ConfigChoice) {
+    static async exec(configChoice: ConfigChoice): Promise<void> {
         const targetDir = resolve(process.cwd(), configChoice.projectName);
 
         await this.installPrisma(targetDir);
@@ -27,7 +27,7 @@ export abstract class SetUpPrisma {
         }
     }
 
-    static async setUpPrismaClean(targetDir: string, configChoice: ConfigChoice) {
+    static async setUpPrismaClean(targetDir: string, configChoice: ConfigChoice): Promise<void>  {
         const exec = promisify(execCb);
         MessageUtil.info('Moving Prisma...');
         await exec(`mkdir -p src/infrastructure/repositories/prisma/.config && mv prisma/* src/infrastructure/repositories/prisma/.config && rmdir prisma`, {
@@ -132,7 +132,7 @@ export abstract class SetUpPrisma {
     
     }
   
-    static  async installPrisma(targetDir: string){
+    static  async installPrisma(targetDir: string): Promise<void> {
     
         const exec = promisify(execCb);
         MessageUtil.info('Installing Prisma...');

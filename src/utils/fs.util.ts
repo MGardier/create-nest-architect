@@ -2,10 +2,10 @@ import { resolve } from "path";
 import { mkdir } from "fs/promises";
 import { promises as fs } from "fs";
 import { MessageUtil } from "./message.util";
-import { ARCHITECTURE_TYPE, Constant } from "../constants/constant";
+
 
 export abstract class FsUtil {
-  static async createDirectory(dirPath: string) {
+  static async createDirectory(dirPath: string): Promise<void> {
     try {
       const targetDir = resolve(process.cwd(), dirPath);
       await mkdir(targetDir, { recursive: true }); // recursive => ne plante pas si le folder existe
@@ -16,7 +16,7 @@ export abstract class FsUtil {
     }
   }
 
-  static async createFile(filePath: string, content: string) {
+  static async createFile(filePath: string, content: string): Promise<void> {
     const targetFile = resolve(process.cwd(), filePath);
     await fs.writeFile(targetFile, content, "utf8");
     MessageUtil.success(`File created at: ${targetFile}`);
@@ -26,7 +26,7 @@ export abstract class FsUtil {
     return await fs.readFile(filePath, 'utf-8');
   }
 
-  static  async updateEnvExampleIfNeeded(projectName: string, key:string , value: string,){   
+  static async updateEnvExampleIfNeeded(projectName: string, key:string , value: string): Promise<void>{   
     const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
     let envExampleContent = await FsUtil.getFileContent(envExamplePath);
     if (!envExampleContent.includes( `${key}=`)) {
