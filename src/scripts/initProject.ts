@@ -1,35 +1,41 @@
-import { exec } from "child_process";
 import {
   ARCHITECTURE_TYPE,
-  Constant,
   DB_LANGUAGE,
   ODM_TYPE,
   ORM_TYPE,
+  REPO_TEMPLATE_URL,
+  TEMPLATE_PATH,
 } from "../constants/constant";
-
+import { promises as fs } from "fs";
 import { PromptUtil } from "../utils/prompt.util";
 import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
+import { promisify } from "util";
+import { exec as execCb } from "child_process";
+import { join, resolve } from "path";
+import { FsUtil } from "../utils/fs.util";
 
 export abstract class InitProject {
-  static async cloneRepo(configChoice: ConfigChoice) {
-    const templates: Record<string, string> = Constant.REPO_TEMPLATE;
+  static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
     const templateRepo: string =
       configChoice.architectureType === ARCHITECTURE_TYPE.CLEAN
-        ? templates.clean
-        : templates.featured;
+        ? REPO_TEMPLATE_URL.CLEAN
+        : REPO_TEMPLATE_URL.FEATURED;
     const projectName: string = configChoice.projectName;
 
-    exec(
-      `git clone --depth 1 --branch main ${templateRepo} ${projectName}`,
-      (err, stdout, stderr) => {
-        if (err) {
-          MessageUtil.error(`Error: ${stderr}`);
-          process.exit(1);
-        }
-        MessageUtil.success(`Project created successfully in ${projectName}`);
-      }
-    );
+    const exec = promisify(execCb);
+
+    try {
+      const { stdout, stderr } = await exec(
+        `git clone --depth 1 --branch main ${templateRepo} ${projectName}`
+      );
+      MessageUtil.info(stdout);
+      if (stderr) MessageUtil.info(stderr);
+      MessageUtil.success("Successfully cloned the repository")
+    } catch (err) {
+      MessageUtil.error("An error append when try to git clone template .");
+      process.exit(1);
+    }
   }
 
   static async collectProjectConfig(): Promise<ConfigChoice> {
@@ -71,3 +77,5 @@ export abstract class InitProject {
     );
   }
 }
+
+

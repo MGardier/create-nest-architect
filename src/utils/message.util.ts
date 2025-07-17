@@ -6,6 +6,10 @@ export abstract class MessageUtil {
   }
 
   static success(message: string): void {
-    console.log(chalk.green(`\n\n🟢 ${message}`));
+    console.log(chalk.green(`\n\n✔  ${message}`));
+  }
+  
+    static info(message: string): void {
+    console.log(chalk.yellow(`\n\n${message}`));
   }
 }

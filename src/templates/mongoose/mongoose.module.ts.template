@@ -1,0 +1,14 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule as NestMongooseModule} from '@nestjs/mongoose';
+import { Product, ProductSchema } from './schemas/mongoose.module';
+
+@Module({
+  imports: [
+    NestMongooseModule.forRoot(process.env.MONGO_URL || 'mongodb://username:password@host:port/db?authSource=admin'),
+    NestMongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+    ]),
+  ],
+  exports: [NestMongooseModule],
+})
+export class MongooseModule {}

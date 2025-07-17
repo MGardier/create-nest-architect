@@ -18,7 +18,7 @@ export abstract class ChoiceUtil {
       title: Constant.getKeyDisplay(ARCHITECTURE_TYPE.FEATURED),
       value: ARCHITECTURE_TYPE.FEATURED,
     };
-    return [clean, featured];
+    return [featured, clean];
   }
 
   static getDbLanguageChoices(): AskChoiceInterface[] {
