@@ -38,6 +38,22 @@ export abstract class FsUtil {
     }
   }
 
+  static async addImportInModuleClean(content: string, importFile: string, importModule: string ): Promise<string> {
+    let result =  content.replace(
+         /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
+        `$1\n${importFile};`
+    );
+    return result.replace(
+        /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
+        `$1\n    ${importModule},`
+    );
+  }
 
+  static async addLineInFileFeatured(content: string, newContent: string): Promise<string> {
+    return content.replace(
+         /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
+        `$1\n   ${newContent}`
+    );
+  }
 
 }

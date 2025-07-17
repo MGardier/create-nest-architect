@@ -50,18 +50,15 @@ export abstract class SetUpPrisma {
         MessageUtil.info(`Generating prisma.service in ${prismaDir}...`);
         await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
 
-        // ajout dans app.module
-        appModuleContent = appModuleContent.replace(
-            /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
-            `$1 
-            import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module';`
+        
+
+        appModuleContent = await  FsUtil.addImportInModuleClean(
+            appModuleContent,
+            `import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module'`,
+            `PrismaModule`
         );
 
-        appModuleContent = appModuleContent.replace(
-            /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
-            `$1 
-            PrismaModule,`
-        );
+    
 
         await FsUtil.createFile(appModulePath, appModuleContent);
         MessageUtil.success(`PrismaModule correctly imported and registered in AppModule`);

@@ -8,7 +8,7 @@ import { TEMPLATE_PATH } from "../constants/constant";
 
 export abstract class SetUpMongoose {
 
-    static async exec(configChoice: ConfigChoice) {
+    static async exec(configChoice: ConfigChoice): Promise<void>  {
         const targetDir = resolve(process.cwd(), configChoice.projectName);
         await this.installMongoose(targetDir);
         if (configChoice.isArchitectureTypeClean()) {
@@ -20,7 +20,12 @@ export abstract class SetUpMongoose {
     }
 
     static async setUpMongooseClean(targetDir: string, configChoice: ConfigChoice): Promise<void>  {
-        const mongooseDir = resolve(process.cwd(), `${configChoice.projectName}/src/infrastructure/repositories/mongoose/`);
+        const mongooseDir = `${targetDir}/src/infrastructure/repositories/mongoose/`;
+        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
+
+
+
+        //TODO: Sortir les méthodes de création des différents fichier 
 
         MessageUtil.info(`Creating Mongoose config folder in ${mongooseDir}...`);
         await FsUtil.createDirectory(mongooseDir);
@@ -34,18 +39,15 @@ export abstract class SetUpMongoose {
         await FsUtil.createFile(`${mongooseDir}/schemas/product.entity.ts`, mongooseEntityContent);
         MessageUtil.success(`mongoose.product.entity.ts generated`);
  
-        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
         let appModuleContent = await FsUtil.getFileContent(appModulePath);
 
-        appModuleContent = appModuleContent.replace(
-            /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
-            `$1\n            import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module';`
+        //Ajout de l'import du fichier et du module 
+        appModuleContent = await  FsUtil.addImportInModuleClean(
+            appModuleContent,
+            `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
+            `MongooseModule`
         );
 
-        appModuleContent = appModuleContent.replace(
-            /(\/\/ Import necessary modules here \(ormModules, etc\.\))/,
-            `$1\n            MongooseModule,`
-        );
 
         await FsUtil.createFile(appModulePath, appModuleContent);
         MessageUtil.success(`MongooseModule correctly imported and registered in AppModule`);
@@ -54,8 +56,10 @@ export abstract class SetUpMongoose {
     }
 
 
-    static async setUpMongooseFeatured(targetDir: string, configChoice: ConfigChoice) {
-        const mongooseProductDir = resolve(process.cwd(), `${configChoice.projectName}/src/product/`);
+    static async setUpMongooseFeatured(targetDir: string, configChoice: ConfigChoice): Promise<void> {
+
+        
+        const mongooseProductDir = `${targetDir}/src/product/`;
 
         const appModulePath : string = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
         let appModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), appModulePath));
