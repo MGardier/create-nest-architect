@@ -16,6 +16,8 @@ import { join, resolve } from "path";
 import { FsUtil } from "../utils/fs.util";
 
 export abstract class InitProject {
+
+    /********************** CLONE REPOSITORY  ******************************** */
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
     const templateRepo: string =
       configChoice.architectureType === ARCHITECTURE_TYPE.CLEAN

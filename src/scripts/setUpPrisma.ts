@@ -14,6 +14,9 @@ export abstract class SetUpPrisma {
     // Todo : rajouter des comportements à exec 
     //TODO: Rajouter des commentaires séparateur 
 
+
+    /********************** EXEC METHOD   ***************************************************************************************************************/
+    //responsability : install prisma and call the right function for configure prisma 
     static async exec(configChoice: ConfigChoice): Promise<void> {
         const targetDir = resolve(process.cwd(), configChoice.projectName);
 
@@ -27,6 +30,9 @@ export abstract class SetUpPrisma {
         }
     }
 
+
+      /********************** CLEAN METHOD    *********************************************************************************************************/
+    //responsability : configure prisma in clean architecture project
     static async setUpPrismaClean(targetDir: string, configChoice: ConfigChoice): Promise<void>  {
         const exec = promisify(execCb);
         MessageUtil.info('Moving Prisma...');
@@ -78,20 +84,25 @@ export abstract class SetUpPrisma {
         FsUtil.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
     }
 
+
+      /********************** FEATURED  METHOD   ******************************************************************************************************/
+      //responsability : configure prisma in featured architecture project
       static async setUpPrismaFeatured(targetDir: string, configChoice: ConfigChoice) {
     
-        let prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
-    
-        //Get content of templates
-        const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
+        //Get all path for project
+        const  prismaDir = resolve(process.cwd(), `${configChoice.projectName}/prisma`);
+        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
         const prismaModulePath = `${prismaDir}/prisma.module.ts`;
-    
-        const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
         const prismaServicePath = `${prismaDir}/prisma.service.ts`;
 
+        //Get content of prisma templates
+        const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
+        const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
+        
+
     
-        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
-        let appModuleContent = await FsUtil.getFileContent(resolve(process.cwd(), appModulePath));
+        //Get content of current app.module in project 
+        let appModuleContent = await FsUtil.getFileContent(appModulePath);
     
         //Creating new file with templat content
         MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
@@ -99,38 +110,30 @@ export abstract class SetUpPrisma {
     
         MessageUtil.info(`Generating prisma.service in ${prismaDir}...`);
         await FsUtil.createFile(prismaServicePath, prismaServiceContent);
+
+
+        //Add prisma import file and prisma import module in current appModule content
+        appModuleContent =  FsUtil.addLineInFileFeatured(appModuleContent,"import { PrismaModule } from 'prisma/prisma.module'","PrismaModule")
     
-        const matchContent = appModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
+        
 
-        if (!matchContent) {
-            MessageUtil.error(`An error append when updating app.module.ts .`);
-            process.exit(1)
-        }
-
-        //Add prisma import 
-        appModuleContent = `import { PrismaModule } from 'prisma/prisma.module \n${appModuleContent}'`
-
-        const currentImports = matchContent[1].trim();
-
-        //add module in imports
-        const newImports = `${currentImports},\n    PrismaModule,`;
-
-        //Replace imports in app module content
-        appModuleContent = appModuleContent.replace(
-        /imports\s*:\s*\[(.*?)\]/s,
-        `imports: [\n    ${newImports}\n  ]`
-        );
-
-        // TODO; app.module en erreur de compile
-       
+        //update app.module file
         await FsUtil.createFile(appModulePath, appModuleContent);
+
+        MessageUtil.success(`PrismaModule correctly imported and registered in AppModule`);
    
+        //Add db url if .env.examplke didnt have one
         FsUtil.updateEnvExampleIfNeeded(configChoice.projectName,"DATABASE_URL","provider://user:password@host:port/database");
     
     }
   
+
+
+      /********************** PRISMA  METHOD   ******************************** **********************************************************************/
+
+    //responsability : install prisma
     static  async installPrisma(targetDir: string): Promise<void> {
-    
+
         const exec = promisify(execCb);
         MessageUtil.info('Installing Prisma...');
         await exec(`npm install prisma @prisma/client && npx prisma init`, {
