@@ -41,7 +41,7 @@ export abstract class SetUpMongoose {
  
        
         let appModuleContent = await FsUtil.getFileContent(appModulePath);
-        appModuleContent = await  FsUtil.addImportInModuleClean(
+        appModuleContent = await  FsUtil.addNewModuleClean(
             appModuleContent,
             `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
             `MongooseModule`
@@ -65,8 +65,8 @@ export abstract class SetUpMongoose {
         const  currentAppModuleContent : string  = await FsUtil.getFileContent(appModulePath);
         const dbUrl : string = "'mongodb://username:password@host:port/db?authSource=admin'";
 
-        const mongooseImportModule: string  =  `MongooseModule.forRoot(env.DATABASE_URL || ${dbUrl})` ;
-        const newAppModuleContent =  FsUtil.addImportInModuleFeatured(currentAppModuleContent,"import { MongooseModule } from '@nestjs/mongoose'",mongooseImportModule);
+        const mongooseImportModule: string  =  `MongooseModule.forRoot(process.env.DATABASE_URL || ${dbUrl})` ;
+        const newAppModuleContent =  FsUtil.addNewModuleFeatured(currentAppModuleContent,"import { MongooseModule } from '@nestjs/mongoose'",mongooseImportModule);
         await FsUtil.createFile(appModulePath, newAppModuleContent);
         MessageUtil.success(`app.module.ts updated`);
 
@@ -78,7 +78,7 @@ export abstract class SetUpMongoose {
 
         const currentProductModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), productModulePath));
         const newImports = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
-        const newProductModuleContent =  FsUtil.addImportInModuleFeatured(currentProductModuleContent,"import { MongooseModule } from '@nestjs/mongoose'",newImports)
+        const newProductModuleContent =  FsUtil.addNewModuleFeatured(currentProductModuleContent,"import { MongooseModule } from '@nestjs/mongoose'",newImports)
         
       
         await FsUtil.createFile(productModulePath, newProductModuleContent);
@@ -89,7 +89,7 @@ export abstract class SetUpMongoose {
     
 
 
-    /********************** Mongoose METHOD   ******************************** **********************************************************************/ 
+    /********************** INSTALL METHOD   ******************************** **********************************************************************/ 
     static async installMongoose(targetDir: string) {
         const exec = promisify(execCb);
         MessageUtil.info('Installing Mongoose...');

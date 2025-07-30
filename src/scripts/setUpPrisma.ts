@@ -10,8 +10,6 @@ import { promises as fs } from "fs";
 export abstract class SetUpPrisma {
 
 
-
-
   /********************** EXEC METHOD   ***************************************************************************************************************/
   static async exec(configChoice: ConfigChoice): Promise<void> {
     const targetDir = resolve(process.cwd(), configChoice.projectName);
@@ -51,7 +49,7 @@ export abstract class SetUpPrisma {
     MessageUtil.info(`Generating prisma.service in ${prismaDir}...`);
     await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
 
-    appModuleContent = await FsUtil.addImportInModuleClean(
+    appModuleContent = await FsUtil.addNewModuleClean(
       appModuleContent,
       `import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module'`,
       `PrismaModule`
@@ -89,7 +87,7 @@ export abstract class SetUpPrisma {
     const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
 
     let appModuleContent = await FsUtil.getFileContent(appModulePath);
-    appModuleContent = FsUtil.addImportInModuleFeatured(appModuleContent, "import { PrismaModule } from 'prisma/prisma.module'", "PrismaModule")
+    appModuleContent = FsUtil.addNewModuleFeatured(appModuleContent, "import { PrismaModule } from 'prisma/prisma.module'", "PrismaModule")
 
     MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
     await FsUtil.createFile(prismaModulePath, prismaModuleContent);
@@ -108,7 +106,7 @@ export abstract class SetUpPrisma {
 
 
 
-  /********************** PRISMA  METHOD   ******************************** **********************************************************************/
+  /********************** INSTALL  METHOD   ******************************** **********************************************************************/
 
   static async installPrisma(targetDir: string): Promise<void> {
 

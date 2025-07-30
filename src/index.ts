@@ -5,11 +5,13 @@ import { ODM_TYPE, ORM_TYPE } from "./constants/constant";
 import { InitProject } from "./scripts/initProject";
 import { SetUpMongoose } from "./scripts/setUpMongoose";
 import { SetUpPrisma } from "./scripts/setUpPrisma";
+import { SetUpConfig } from './scripts/setUpConfigService';
 
-
+  //TODO :v1 Gérer les espaces entre les messages
  
   //TODO : v2 tester et gestions des erreurs
   //TODO : v2 setUp Docker 
+  //TODO : v3 add new resource command
 
 
 
@@ -28,9 +30,7 @@ export const setUpProject = async () => {
     }
   }
  
- 
-
-
+ await SetUpConfig.exec(configChoice);
 };
 
 setUpProject();

@@ -11,7 +11,7 @@ export abstract class FsUtil {
    static async createDirectory(dirPath: string): Promise<void> {
     try {
       const targetDir = resolve(process.cwd(), dirPath);
-      await mkdir(targetDir, { recursive: true }); // recursive => ne plante pas si le folder existe
+      await mkdir(targetDir, { recursive: true }); // recursive => create folder if not existing
       MessageUtil.success(`Folder created at: ${targetDir}`);
     } catch (error) {
       MessageUtil.error(`Failed to create folder: ${error}`);
@@ -35,7 +35,7 @@ export abstract class FsUtil {
    /********************** .ENV FILE METHOD   *************************************************************************************************************/
 
 
-  //responsability : add new import in module and import his file in clean architecture template
+  
   static async updateEnvExampleIfNeeded(projectName: string, key:string , value: string): Promise<void>{   
     const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
     let envExampleContent = await FsUtil.getFileContent(envExamplePath);
@@ -49,9 +49,9 @@ export abstract class FsUtil {
   }
 
 
-   /********************** ADD IMPORTS IN MODULE FILE METHOD   *************************************************************************************************************/
+   /********************** ADD NEW MODULE METHOD   *************************************************************************************************************/
 
-  static  addImportInModuleClean(content: string, importFile: string, importModule: string ): string {
+  static  addNewModuleClean(content: string, importFile: string, importModule: string ): string {
     let result =  content.replace(
          /(\/\/ Infrastructure \(Concrete implementation - adapters, ormModules, etc\.\))/,
         `$1\n${importFile};`
@@ -62,7 +62,7 @@ export abstract class FsUtil {
     );
   }
 
-  static  addImportInModuleFeatured(content: string, importFile: string, importModule: string): string {
+  static  addNewModuleFeatured(content: string, importFile: string, importModule: string): string {
           const regex = /imports\s*:\s*\[(.*?)\]/s;
 
         const matchContent: RegExpMatchArray | null = content.match(regex);
@@ -75,9 +75,9 @@ export abstract class FsUtil {
     
         let moduleImports: string ;
         if(currentModuleImports)
-         moduleImports = `${currentModuleImports},\n    ${importModule},`;
+         moduleImports = `${currentModuleImports},\n    ${importModule}`;
         else
-          moduleImports = `\n    ${importModule},`;
+          moduleImports = `\n    ${importModule}`;
 
         
         return  content.replace(
