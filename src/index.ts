@@ -7,6 +7,12 @@ import { SetUpMongoose } from "./scripts/setUpMongoose";
 import { SetUpPrisma } from "./scripts/setUpPrisma";
 
 
+ 
+  //TODO : v2 tester et gestions des erreurs
+  //TODO : v2 setUp Docker 
+
+
+
 export const setUpProject = async () => {
   const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
   await InitProject.cloneRepo(configChoice);
@@ -22,7 +28,7 @@ export const setUpProject = async () => {
     }
   }
  
-  //TODO:  config service à ajouter
+ 
 
 
 };
