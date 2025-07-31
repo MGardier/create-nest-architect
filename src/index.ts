@@ -6,8 +6,12 @@ import { InitProject } from "./scripts/initProject";
 import { SetUpMongoose } from "./scripts/setUpMongoose";
 import { SetUpPrisma } from "./scripts/setUpPrisma";
 import { SetUpConfig } from './scripts/setUpConfigService';
+import { FinalizeProject } from "./scripts/finalizeProject";
+import { MessageUtil } from "./utils/message.util";
 
   //TODO :v1 Gérer les espaces entre les messages
+  //TODO : v1 step : Prisma changer le provider si besoin , modifier le schema  puis migrate dev
+  //TODO :v1 Ajout ReadMe
  
   //TODO : v2 tester et gestions des erreurs
   //TODO : v2 setUp Docker 
@@ -31,6 +35,14 @@ export const setUpProject = async () => {
   }
  
  await SetUpConfig.exec(configChoice);
+ await FinalizeProject.installDependencies();
+
+  MessageUtil.success(`Project ${configChoice.projectName} was successfully installed and configured.
+    👉  Get started with the following commands:
+
+    $ cd test
+    $ npm run start
+  `);
 };
 
 setUpProject();

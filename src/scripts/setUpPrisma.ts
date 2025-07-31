@@ -35,12 +35,14 @@ export abstract class SetUpPrisma {
     });
     MessageUtil.success(`Prisma moved in src/infrastructure/repositories/prisma/.config`);
 
-    const prismaDir = `${targetDir}/src/infrastructure/repositories/prisma/.config`;
+   
+    const prismaDir = join(targetDir,'/src/infrastructure/repositories/prisma/.config');
 
     const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
+
     const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
 
-    const appModulePath = `${targetDir}/src/app.module.ts`;
+    const appModulePath = join(targetDir,'/src/app.module.ts');
     let appModuleContent = await FsUtil.getFileContent(appModulePath);
 
     MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
@@ -59,17 +61,12 @@ export abstract class SetUpPrisma {
     await FsUtil.createFile(appModulePath, appModuleContent);
     MessageUtil.success(`PrismaModule correctly imported and registered in AppModule`);
 
-   
-    const packageJsonPath = join(targetDir, 'package.json');
-    const packageJsonContent = await FsUtil.getFileContent(packageJsonPath);
-    const packageJson = JSON.parse(packageJsonContent);
+    
+    let prismaConfigContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_CONFIG}`));
+    prismaConfigContent = await FsUtil.addOptionInPrismaConfig(prismaConfigContent,"  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
 
-    packageJson.prisma = {
-      schema: "src/infrastructure/repositories/prisma/.config/schema.prisma"
-    };
+    await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
 
-    await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2)); // indentation
-    MessageUtil.success('Added prisma.schema path to package.json');
 
     FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "provider://user:password@host:port/database");
   }
@@ -100,6 +97,9 @@ export abstract class SetUpPrisma {
     MessageUtil.success(`PrismaModule correctly imported and registered in AppModule`);
 
 
+    let prismaConfigContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_CONFIG}`));
+    await FsUtil.createFile(`${prismaDir}/prisma.ts`, prismaConfigContent);
+
     FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "provider://user:password@host:port/database");
 
   }
@@ -112,10 +112,19 @@ export abstract class SetUpPrisma {
 
     const exec = promisify(execCb);
     MessageUtil.info('Installing Prisma...');
+
     await exec(`npm install prisma @prisma/client && npx prisma init`, {
       cwd: targetDir,
       shell: "/bin/bash"
     });
     MessageUtil.success('Prisma successfully installed');
+
+    const prismaSchemaPath = `${targetDir}/prisma/schema.prisma`;
+    let prismaSchemaContent = await FsUtil.getFileContent(prismaSchemaPath);
+    const newPrismaSchemaContent = prismaSchemaContent.replace(/^\s*output\s*=.*$/gm, '')
+    await FsUtil.createFile(prismaSchemaPath, newPrismaSchemaContent);
+
+    
+
   }
 }

@@ -87,4 +87,14 @@ export abstract class FsUtil {
    
   }
 
+  /********************** PRISMA CONFIG METHOD   *************************************************************************************************************/
+
+ static  addOptionInPrismaConfig(content: string, option: string): string {
+    return  content.replace(
+         /(\/\/ Your options\.?\s*$)/m,
+        `$1\n${option},`
+    );
+
+  }
+
 }

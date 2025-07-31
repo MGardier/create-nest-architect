@@ -77,8 +77,12 @@ export abstract class SetUpMongoose {
 
 
         const currentProductModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), productModulePath));
-        const newImports = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
-        const newProductModuleContent =  FsUtil.addNewModuleFeatured(currentProductModuleContent,"import { MongooseModule } from '@nestjs/mongoose'",newImports)
+        const newMongooseModuleForProductModule = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
+        const newImportsForProductModule = `
+            import { MongooseModule } from '@nestjs/mongoose';
+            import { Product, ProductSchema } from './entities/product.entity';
+        `
+        const newProductModuleContent =  FsUtil.addNewModuleFeatured(currentProductModuleContent,newImportsForProductModule,newMongooseModuleForProductModule)
         
       
         await FsUtil.createFile(productModulePath, newProductModuleContent);
