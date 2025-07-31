@@ -50,7 +50,7 @@ export abstract class SetUpMongoose {
 
         MessageUtil.success(`MongooseModule correctly imported and registered in AppModule`);
 
-        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "MONGODB_URI", "mongodb://username:password@host:port/db?authSource=admin");
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "mongodb://username:password@host:port/db?authSource=admin");
     }
 
     /********************** FEATURED  METHOD   ******************************************************************************************************/
@@ -88,7 +88,7 @@ export abstract class SetUpMongoose {
         await FsUtil.createFile(productModulePath, newProductModuleContent);
         MessageUtil.success(`product.module.ts updated`);
 
-        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "MONGODB_URI", "mongodb://username:password@host:port/db?authSource=admin");
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "mongodb://username:password@host:port/db?authSource=admin");
     }
     
 

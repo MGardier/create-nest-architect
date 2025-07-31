@@ -1,10 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule as NestMongooseModule} from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    NestMongooseModule.forRoot(process.env.MONGO_URL || 'mongodb://username:password@host:port/db?authSource=admin'),
+    NestMongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('DATABASE_URL'),
+      }),
+      inject: [ConfigService],
+    }),
     NestMongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
     ]),

@@ -35,21 +35,21 @@ export abstract class SetUpPrisma {
     });
     MessageUtil.success(`Prisma moved in src/infrastructure/repositories/prisma/.config`);
 
-   
-    const prismaDir = join(targetDir,'/src/infrastructure/repositories/prisma/.config');
+
+    const prismaDir = join(targetDir, '/src/infrastructure/repositories/prisma/.config');
 
     const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
-
-    const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
-
-    const appModulePath = join(targetDir,'/src/app.module.ts');
-    let appModuleContent = await FsUtil.getFileContent(appModulePath);
-
     MessageUtil.info(`Generating prisma.module in ${prismaDir}...`);
     await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, prismaModuleContent);
 
+    
+    const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
     MessageUtil.info(`Generating prisma.service in ${prismaDir}...`);
     await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
+
+
+    const appModulePath = join(targetDir, '/src/app.module.ts');
+    let appModuleContent = await FsUtil.getFileContent(appModulePath);
 
     appModuleContent = await FsUtil.addNewModuleClean(
       appModuleContent,
@@ -61,9 +61,9 @@ export abstract class SetUpPrisma {
     await FsUtil.createFile(appModulePath, appModuleContent);
     MessageUtil.success(`PrismaModule correctly imported and registered in AppModule`);
 
-    
-    let prismaConfigContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_CONFIG}`));
-    prismaConfigContent = await FsUtil.addOptionInPrismaConfig(prismaConfigContent,"  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
+    const prismaConfigPath = join(targetDir, '/prisma.config.ts');
+    let prismaConfigContent = await FsUtil.getFileContent(prismaConfigPath);
+    prismaConfigContent = await FsUtil.addOptionInPrismaConfig(prismaConfigContent, "  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
 
     await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
 
@@ -124,7 +124,10 @@ export abstract class SetUpPrisma {
     const newPrismaSchemaContent = prismaSchemaContent.replace(/^\s*output\s*=.*$/gm, '')
     await FsUtil.createFile(prismaSchemaPath, newPrismaSchemaContent);
 
-    
+
+    let prismaConfigContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.PRISMA_CONFIG}`));
+
+    await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
 
   }
 }

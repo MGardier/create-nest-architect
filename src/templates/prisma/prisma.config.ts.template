@@ -5,6 +5,6 @@ import { config } from 'dotenv';
 config();
 
 export default defineConfig({
-  // Your options 
+ // Define your prisma options modules here (ormModules, etc.)
 
 });

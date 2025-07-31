@@ -1,7 +1,7 @@
 import { ConfigChoice } from "../classes/configChoice.class";
 import { FsUtil } from "../utils/fs.util";
 import { MessageUtil } from "../utils/message.util";
-import {  resolve } from "path";
+import {  join, resolve } from "path";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
 
@@ -20,19 +20,8 @@ export abstract class SetUpConfig {
 
     await this.installConfig(targetDir);
 
-    if (configChoice.isArchitectureTypeClean()) {
-      await this.setUpConfigClean(targetDir, configChoice);
-    }
-    else {
+    if (configChoice.isArchitectureTypeFeatured()) 
       await this.setUpConfigFeatured(targetDir);
-    }
-  }
-
-
-  /********************** CLEAN METHOD    *********************************************************************************************************/
-  static async setUpConfigClean(targetDir: string, configChoice: ConfigChoice): Promise<void> {
-    const moduleImport = "ConfigModule.forRoot({isGlobal: true,})";
-    const appModulePath = `${targetDir}/src/app.module.ts`;
 
   }
 
@@ -40,11 +29,12 @@ export abstract class SetUpConfig {
   /********************** FEATURED  METHOD   ******************************************************************************************************/
   static async setUpConfigFeatured(targetDir: string) {
 
-    const moduleImport = "ConfigModule.forRoot({isGlobal: true,})";
-    const appModulePath = `${targetDir}/src/app.module.ts`;
+    const configModule = "ConfigModule.forRoot({isGlobal: true,})";
+    const configImport ="import { ConfigModule } from '@nestjs/config'"
+    const appModulePath = join(targetDir,'/src/app.module.ts');
 
     let appModuleContent = await FsUtil.getFileContent(appModulePath);
-    appModuleContent = FsUtil.addNewModuleFeatured(appModuleContent, "import { ConfigModule } from '@nestjs/config'", moduleImport)
+    appModuleContent = FsUtil.addNewModuleFeatured(appModuleContent, configImport, configModule)
 
     await FsUtil.createFile(appModulePath, appModuleContent);
     MessageUtil.success(`ConfigModule correctly imported and registered in AppModule`);
