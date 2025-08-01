@@ -10,8 +10,8 @@ import { FinalizeProject } from "./scripts/finalizeProject";
 import { MessageUtil } from "./utils/message.util";
 
 //TODO :v1 Modifier le package.json avec le nom du projet 
-//TODO :v1 Gérer les espaces entre les messages
-//TODO : v1 step : message fin Prisma changer le provider si besoin , modifier le schema  puis migrate dev + mongodb modifier le mongoose module
+//TODO:v1 Ajouter les keywords de la librairie
+
 //TODO :v1 Ajout ReadMe
 
 //TODO : v2 tester et gestions des erreurs

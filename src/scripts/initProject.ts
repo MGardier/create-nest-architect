@@ -12,8 +12,7 @@ import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
-import { join, resolve } from "path";
-import { FsUtil } from "../utils/fs.util";
+
 
 export abstract class InitProject {
 
