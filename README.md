@@ -99,6 +99,8 @@ Organizes code by features/resources. Each feature contains all related files (c
 3. Create `.env` file and set your `DATABASE_URL` for MongoDB connection
 4. Start your application
 
+📚 [NestJS Mongoose Documentation](https://docs.nestjs.com/techniques/mongodb)
+
 ## Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.
