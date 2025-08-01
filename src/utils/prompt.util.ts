@@ -21,7 +21,7 @@ export abstract class PromptUtil {
       message: question,
       name: field,
     });
-    console.log();
+
     return answer;
   }
 
@@ -37,7 +37,7 @@ export abstract class PromptUtil {
       name: field,
       choices,
     });
-    console.log();
+ 
     return answer;
   }
 
@@ -52,7 +52,7 @@ export abstract class PromptUtil {
       );
       projectName = answer;
     }
-    console.log();
+ 
     return projectName;
   }
 
@@ -65,7 +65,7 @@ export abstract class PromptUtil {
       "select",
       "answer"
     );
-    console.log();
+
     return answer as ARCHITECTURE_TYPE;
   }
 
@@ -78,7 +78,6 @@ export abstract class PromptUtil {
       "select",
       "answer"
     );
-    console.log();
     return answer as DB_LANGUAGE;
   }
 
@@ -91,7 +90,6 @@ export abstract class PromptUtil {
       "select",
       "answer"
     );
-    console.log();
     return answer as ORM_TYPE;
   }
 
@@ -104,7 +102,6 @@ export abstract class PromptUtil {
       "select",
       "answer"
     );
-    console.log();
     return answer as ODM_TYPE;
   }
 

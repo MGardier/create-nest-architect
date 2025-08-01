@@ -37,12 +37,13 @@ export abstract class FsUtil {
 
 
   static async updateEnvExampleIfNeeded(projectName: string, key: string, value: string): Promise<void> {
+    MessageUtil.info(`\nAdding  ${key} to .env.example...`);
     const envExamplePath = resolve(process.cwd(), `${projectName}/.env.example`);
     let envExampleContent = await FsUtil.getFileContent(envExamplePath);
     if (!envExampleContent.includes(`${key}=`)) {
       envExampleContent += `\n${key}="${value}"\n`;
       await FsUtil.createFile(envExamplePath, envExampleContent);
-      MessageUtil.success(`Added ${key} to .env.example`);
+      MessageUtil.success(`.env correctly updated with ${key}`);
     } else {
       MessageUtil.info(`${key} already exists in .env.example`);
     }

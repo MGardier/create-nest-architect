@@ -8,7 +8,7 @@ export abstract class FinalizeProject {
 
     /********************** CLONE REPOSITORY  ******************************** */
   static async installDependencies(): Promise<void> {
-
+ console.log()
     MessageUtil.info("Install dependecies ....");
     const exec = promisify(execCb);
 
