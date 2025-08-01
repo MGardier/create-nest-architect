@@ -14,12 +14,6 @@ export class Product {
     @Prop({ required: true })
     name: string;
 
-    @Prop()
-    externalPriceId: string | null;
-
-    @Prop()
-    externalProductId: string | null;
-
     @Prop({ required: true })
     quantity: number;
 

@@ -12,10 +12,11 @@ import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
-import { join, resolve } from "path";
-import { FsUtil } from "../utils/fs.util";
+
 
 export abstract class InitProject {
+
+    /********************** CLONE REPOSITORY  ******************************** */
   static async cloneRepo(configChoice: ConfigChoice): Promise<void> {
     const templateRepo: string =
       configChoice.architectureType === ARCHITECTURE_TYPE.CLEAN
@@ -33,12 +34,13 @@ export abstract class InitProject {
       if (stderr) MessageUtil.info(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-      MessageUtil.error("An error append when try to git clone template .");
+      MessageUtil.error("An error append when try to git clone template, please check that a project does not already exist and git works.");
       process.exit(1);
     }
   }
 
   static async collectProjectConfig(): Promise<ConfigChoice> {
+    
     /********************** PROJECT NAME  ******************************** */
     const projectName = await PromptUtil.askProjectNameIfNeeded();
     if (!projectName) {

@@ -2,14 +2,16 @@ import chalk from "../../node_modules/chalk/source/index";
 
 export abstract class MessageUtil {
   static error(message: string): void {
-    console.error(chalk.red(`\n\n❌ ${message}`));
+    console.error(chalk.red(`❌ ${message}`));
   }
 
   static success(message: string): void {
-    console.log(chalk.green(`\n\n✔  ${message}`));
+    console.log(chalk.green(`✔ ${message}`));
   }
   
     static info(message: string): void {
-    console.log(chalk.yellow(`\n\n${message}`));
+    console.log(chalk.yellow(`  ${message}`));
   }
+
+
 }

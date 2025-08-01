@@ -8,133 +8,101 @@ import { TEMPLATE_PATH } from "../constants/constant";
 
 export abstract class SetUpMongoose {
 
-    static async exec(configChoice: ConfigChoice): Promise<void>  {
+    /********************** EXEC METHOD   ***************************************************************************************************************/
+    static async exec(configChoice: ConfigChoice): Promise<string> {
+        MessageUtil.info('\nInstalling Mongoose...');
         const targetDir = resolve(process.cwd(), configChoice.projectName);
         await this.installMongoose(targetDir);
         if (configChoice.isArchitectureTypeClean()) {
-            this.setUpMongooseClean(targetDir, configChoice);
+            await this.setUpMongooseClean(targetDir, configChoice);
         }
         else {
-            this.setUpMongooseFeatured(targetDir, configChoice);
+            await this.setUpMongooseFeatured(targetDir, configChoice);
         }
+
+            return `
+    👉 Before starting dont forget to : 
+    
+      - Create .env and connect your MongoDB with Mongoose.
+      - Add your with your entites and modules with mongoose.
+    `;
     }
 
-    static async setUpMongooseClean(targetDir: string, configChoice: ConfigChoice): Promise<void>  {
+    /********************** CLEAN METHOD    *********************************************************************************************************/
+    static async setUpMongooseClean(targetDir: string, configChoice: ConfigChoice): Promise<void> {
+
         const mongooseDir = `${targetDir}/src/infrastructure/repositories/mongoose/`;
-        const appModulePath = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
+        const appModulePath = `${targetDir}/src/app.module.ts`;
 
-
-
-        //TODO: Sortir les méthodes de création des différents fichier 
-
-        MessageUtil.info(`Creating Mongoose config folder in ${mongooseDir}...`);
+        MessageUtil.info(`\nCreating Mongoose config folder in ${mongooseDir}...`);
         await FsUtil.createDirectory(mongooseDir);
 
+        MessageUtil.info(`\nGenerating mongoose module...`);
         const mongooseModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.MONGOOSE_MODULE}`));
         await FsUtil.createFile(`${mongooseDir}/mongoose.module.ts`, mongooseModuleContent);
-        MessageUtil.success(`mongoose.module.ts generated`);
 
+
+        MessageUtil.info(`\nGenerating mongoose example entity...`);
         await FsUtil.createDirectory(`${mongooseDir}/schemas`);
         const mongooseEntityContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.MONGOOSE_ENTITY}`));
         await FsUtil.createFile(`${mongooseDir}/schemas/product.entity.ts`, mongooseEntityContent);
-        MessageUtil.success(`mongoose.product.entity.ts generated`);
- 
-        let appModuleContent = await FsUtil.getFileContent(appModulePath);
 
-        //Ajout de l'import du fichier et du module 
-        appModuleContent = await  FsUtil.addImportInModuleClean(
+        MessageUtil.info(`\nUpdating app module...`);
+        let appModuleContent = await FsUtil.getFileContent(appModulePath);
+        appModuleContent = await FsUtil.addNewModuleClean(
             appModuleContent,
             `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
             `MongooseModule`
         );
-
-
         await FsUtil.createFile(appModulePath, appModuleContent);
-        MessageUtil.success(`MongooseModule correctly imported and registered in AppModule`);
 
-        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "MONGODB_URI", "mongodb://username:password@host:port/db?authSource=admin");
+        MessageUtil.success(`MongooseModule correctly imported and AppModule correctly updated.`);
+
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "mongodb://username:password@host:port/db?authSource=admin");
     }
 
-
+    /********************** FEATURED  METHOD   ******************************************************************************************************/
     static async setUpMongooseFeatured(targetDir: string, configChoice: ConfigChoice): Promise<void> {
 
-        
-        const mongooseProductDir = `${targetDir}/src/product/`;
 
-        const appModulePath : string = resolve(process.cwd(), `${configChoice.projectName}/src/app.module.ts`);
-        let appModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), appModulePath));
-        const exampleDbUrl : string = "'mongodb://username:password@host:port/db?authSource=admin'";
+        const mongooseDir = `${targetDir}/src/product/`;
+        const appModulePath: string = `${targetDir}/src/app.module.ts`;
+        const productModulePath: string = `${targetDir}/src/product/product.module.ts`;
 
-        const mongooseImportModule: string  =  `MongooseModule.forRoot(env.DATABASE_URL || ${exampleDbUrl})` 
-          
-        const matchAppModuleContent = appModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
 
-        if (!matchAppModuleContent) {
-            MessageUtil.error(`An error happened when updating app.module.ts .`);
-            process.exit(1)
-        }
-
-        //Add prisma import 
-        appModuleContent = `import { MongooseModule } from '@nestjs/mongoose' \n${appModuleContent}`
-
-        const currentAppModuleImports = matchAppModuleContent[1].trim();
-
-        //add module in imports
-        const newAppModuleImports = `${currentAppModuleImports},\n    ${mongooseImportModule},`;
-
-        //Replace imports in app module content
-        appModuleContent = appModuleContent.replace(
-        /imports\s*:\s*\[(.*?)\]/s,
-        `imports: [\n    ${newAppModuleImports}\n  ]`
-        );
-        
-        await FsUtil.createFile(appModulePath, appModuleContent);
-        MessageUtil.success(`app.module.ts updated`);
-
+        MessageUtil.info(`\nGenerating mongoose example  entity in ${mongooseDir}...`);
         const mongooseEntityContent = await FsUtil.getFileContent(resolve(__dirname, `../templates/${TEMPLATE_PATH.MONGOOSE_ENTITY}`));
-        await FsUtil.createFile(`${mongooseProductDir}/entities/product.entity.ts`, mongooseEntityContent);
-        MessageUtil.success(`mongoose.product.entity.ts generated`);
+        await FsUtil.createFile(`${mongooseDir}/entities/product.entity.ts`, mongooseEntityContent);
 
 
-        const productModulePath : string = resolve(process.cwd(), `${configChoice.projectName}/src/product/product.module.ts`);
-        let productModuleContent : string  = await FsUtil.getFileContent(resolve(process.cwd(), productModulePath));
-        
-         const matchProductModuleContent = productModuleContent.match(/imports\s*:\s*\[(.*?)\]/s);
+        MessageUtil.info(`\nUpdating example entity module...`);
+        const currentProductModuleContent: string = await FsUtil.getFileContent(resolve(process.cwd(), productModulePath));
+        const newMongooseModuleForProductModule = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
+        const newImportsForProductModule = `
+            import { MongooseModule } from '@nestjs/mongoose';
+            import { Product, ProductSchema } from './entities/product.entity';
+        `
+        const newProductModuleContent = FsUtil.addNewModuleFeatured(currentProductModuleContent, newImportsForProductModule, newMongooseModuleForProductModule)
+        await FsUtil.createFile(productModulePath, newProductModuleContent);
 
-        if (!matchProductModuleContent) {
-            MessageUtil.error(`An error append when updating app.module.ts .`);
-            process.exit(1)
-        }
+        MessageUtil.info(`\nUpdating app.module...`);
+        const currentAppModuleContent: string = await FsUtil.getFileContent(appModulePath);
+        const dbUrl: string = "'mongodb://username:password@host:port/db?authSource=admin'";
 
-        
-        productModuleContent = `import { MongooseModule } from '@nestjs/mongoose' \n${appModuleContent}`
+        const mongooseImportModule: string = `MongooseModule.forRoot(process.env.DATABASE_URL || ${dbUrl})`;
+        const newAppModuleContent = FsUtil.addNewModuleFeatured(currentAppModuleContent, "import { MongooseModule } from '@nestjs/mongoose'", mongooseImportModule);
+        await FsUtil.createFile(appModulePath, newAppModuleContent);
+        MessageUtil.success(`Mongoose module  correctly generating and app module correctly updated.`);
 
-        const currentProductModuleImports = matchProductModuleContent[1].trim();
-
-
-    
-
-        //add module in imports
-        const newImports = `${currentProductModuleImports}\n   MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),`;
-
-        //Replace imports in app module content
-        productModuleContent = productModuleContent.replace(
-        /imports\s*:\s*\[(.*?)\]/s,
-        `imports: [\n    ${newImports}\n  ]`
-        );
-        
-        await FsUtil.createFile(productModulePath, productModuleContent);
-        MessageUtil.success(`product.module.ts updated`);
-
-      
-        //un example de module pour product
-        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "MONGODB_URI", "mongodb://username:password@host:port/db?authSource=admin");
-
+        FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "mongodb://username:password@host:port/db?authSource=admin");
     }
-    
+
+
+
+    /********************** INSTALL METHOD   ******************************** **********************************************************************/
     static async installMongoose(targetDir: string) {
         const exec = promisify(execCb);
-        MessageUtil.info('Installing Mongoose...');
+        
         await exec(`npm i @nestjs/mongoose mongoose`, {
             cwd: targetDir,
             shell: "/bin/bash"
