@@ -43,7 +43,8 @@ export const setUpProject = async () => {
   }
 
   await SetUpConfig.exec(configChoice);
-  await FinalizeProject.installDependencies();
+  await FinalizeProject.installDependencies(configChoice);
+  
 
 MessageUtil.success(`\nProject ${configChoice.projectName} was successfully installed and configured.`);
   MessageUtil.info(`\n

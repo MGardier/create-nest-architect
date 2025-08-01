@@ -32,7 +32,7 @@ export abstract class SetUpMongoose {
     static async setUpMongooseClean(targetDir: string, configChoice: ConfigChoice): Promise<void> {
 
         const mongooseDir = `${targetDir}/src/infrastructure/repositories/mongoose/`;
-        const appModulePath = `${targetDir}/src/app.module.ts`;
+        
 
         MessageUtil.info(`\nCreating Mongoose config folder in ${mongooseDir}...`);
         await FsUtil.createDirectory(mongooseDir);
@@ -48,6 +48,7 @@ export abstract class SetUpMongoose {
         await FsUtil.createFile(`${mongooseDir}/schemas/product.entity.ts`, mongooseEntityContent);
 
         MessageUtil.info(`\nUpdating app module...`);
+        const appModulePath = `${targetDir}/src/app.module.ts`;
         let appModuleContent = await FsUtil.getFileContent(appModulePath);
         appModuleContent = await FsUtil.addNewModuleClean(
             appModuleContent,
