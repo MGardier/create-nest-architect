@@ -1,4 +1,5 @@
-import chalk from "../../node_modules/chalk/source/index";
+import chalk from 'chalk';
+
 
 export abstract class MessageUtil {
   static error(message: string): void {
