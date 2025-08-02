@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/nest-architect.svg)](https://www.npmjs.com/package/nest-architect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Nest Logo](https://nestjs.com/img/logo-small.svg)
+<img src="https://nestjs.com/img/logo-small.svg" width="100" alt="Nest Logo" />
 
 Generate NestJS applications with pre-configured architecture patterns and ready-to-use ORM/ODM setup.
 
@@ -99,7 +99,8 @@ Organizes code by features/resources. Each feature contains all related files (c
 3. Create `.env` file and set your `DATABASE_URL` for MongoDB connection
 4. Start your application
 
-📚 [NestJS Prisma Documentation](https://docs.nestjs.com/techniques/mongodb)
+📚 [NestJS Mongoose Documentation](https://docs.nestjs.com/techniques/mongodb)
+
 ## Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.

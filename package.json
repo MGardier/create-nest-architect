@@ -1,16 +1,18 @@
 {
   "name": "create-nest-architect",
-  "version": "1.0.0",
-  "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice",
+  "version": "1.0.2",
+  "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice and orm or odm configured",
   "main": "index.js",
   "bin": {
-    "my-nest-cli": "./dist/index.js"
+    "create-nest-architect": "./dist/index.js"
   },
   "scripts": {
-    "dev": "npx tsx src/index.ts"
+    "build": "npx tsx scripts/build.ts",
+    "dev": "npx tsx src/index.ts",
+    "prepublishOnly": "npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Maxime Gardier",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.0.13",
     "@types/prompts": "^2.4.9",
@@ -20,5 +22,34 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "prompts": "^2.4.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MGardier/create-nest-architect.git"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "nestjs",
+    "nest",
+    "cli",
+    "generator",
+    "template",
+    "boilerplate",
+    "scaffold",
+    "architecture",
+    "clean-architecture",
+    "prisma",
+    "mongoose",
+    "orm",
+    "odm",
+    "typescript",
+    "nodejs",
+    "backend",
+    "api",
+    "crud",
+    "starter",
+    "developer-tools"
+  ]
 }

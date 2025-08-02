@@ -82,4 +82,15 @@ export abstract class FsUtil {
 
   }
 
+
+  /********************** PACKAGE JSON  METHOD   *************************************************************************************************************/
+  static updateProjectNameInPackageJson(content: string, projectName: string,): string {
+
+    return content.replace(
+      /("name"\s*:\s*)"[^"]*"/g,
+      `$1"${projectName}"`
+    );
+
+  }
+
 }
