@@ -1,14 +1,15 @@
 {
   "name": "create-nest-architect",
   "version": "1.0.0",
-  "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice",
+  "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice and orm or odm configured",
   "main": "index.js",
   "bin": {
     "my-nest-cli": "./dist/index.js"
   },
-  
   "scripts": {
-    "dev": "npx tsx src/index.ts"
+    "dev": "npx tsx src/index.ts",
+    "build": "npx tsc",
+    "prepublishOnly": "npm run build"
   },
   "author": "Maxime Gardier",
   "license": "MIT",
@@ -21,6 +22,13 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "prompts": "^2.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MGardier/create-nest-architect.git"
+  },
+  "engines": {
+    "node": ">=16"
   },
   "keywords": [
     "nestjs",
