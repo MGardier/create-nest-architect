@@ -7,8 +7,8 @@
     "my-nest-cli": "./dist/index.js"
   },
   "scripts": {
+     "build": "npx tsx scripts/build.ts",
     "dev": "npx tsx src/index.ts",
-    "build": "npx tsc",
     "prepublishOnly": "npm run build"
   },
   "author": "Maxime Gardier",
