@@ -111,6 +111,7 @@ Missing an architecture pattern or ORM/ODM? Open an issue or submit a PR.
 
 - [Mehdi Larek](https://github.com/LarekMehdi)
 - [Amine SERRA](https://linkedin.com/in/amine-serra-5105b5252/)
+- [Florian Forlini](https://www.linkedin.com/in/florianforlini/)
 
 ## License
 
