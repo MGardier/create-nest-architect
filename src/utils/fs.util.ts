@@ -19,6 +19,12 @@ export abstract class FsUtil {
     }
   }
 
+  static async deleteDirectory(filePath: string): Promise<void> {
+    const targetFile = resolve(process.cwd(), filePath);
+    await fs.rm(targetFile,{recursive: true});
+    MessageUtil.success(`File deleted at: ${targetFile}`);
+  }
+
   /**********************  FILE METHOD   *************************************************************************************************************/
 
   static async createFile(filePath: string, content: string): Promise<void> {
@@ -26,6 +32,8 @@ export abstract class FsUtil {
     await fs.writeFile(targetFile, content, "utf8");
     MessageUtil.success(`File created at: ${targetFile}`);
   }
+
+
 
   static async getFileContent(filePath: string): Promise<string> {
     return await fs.readFile(filePath, 'utf-8');

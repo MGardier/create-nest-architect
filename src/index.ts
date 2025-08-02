@@ -9,10 +9,9 @@ import { SetUpConfig } from './scripts/setUpConfigService';
 import { FinalizeProject } from "./scripts/finalizeProject";
 import { MessageUtil } from "./utils/message.util";
 
-//TODO :v1 Modifier le package.json avec le nom du projet 
-//TODO:v1 Ajouter les keywords de la librairie
+//TODO : Supprimer le .git du template
+//TODO : Modifier le readme des templates 
 
-//TODO :v1 Ajout ReadMe
 
 //TODO : v2 tester et gestions des erreurs
 //TODO : v2 Ajouter des architectures
@@ -43,7 +42,7 @@ export const setUpProject = async () => {
   }
 
   await SetUpConfig.exec(configChoice);
-  await FinalizeProject.installDependencies(configChoice);
+  await FinalizeProject.exec(configChoice);
   
 
 MessageUtil.success(`\nProject ${configChoice.projectName} was successfully installed and configured.`);
