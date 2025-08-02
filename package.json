@@ -6,11 +6,12 @@
   "bin": {
     "my-nest-cli": "./dist/index.js"
   },
+  
   "scripts": {
     "dev": "npx tsx src/index.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Maxime Gardier",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.0.13",
     "@types/prompts": "^2.4.9",
@@ -20,5 +21,27 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "prompts": "^2.4.2"
-  }
+  },
+  "keywords": [
+    "nestjs",
+    "nest",
+    "cli",
+    "generator",
+    "template",
+    "boilerplate",
+    "scaffold",
+    "architecture",
+    "clean-architecture",
+    "prisma",
+    "mongoose",
+    "orm",
+    "odm",
+    "typescript",
+    "nodejs",
+    "backend",
+    "api",
+    "crud",
+    "starter",
+    "developer-tools"
+  ]
 }
