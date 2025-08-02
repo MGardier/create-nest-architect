@@ -17,7 +17,7 @@ export abstract class FinalizeProject {
 
     try {
       const { stdout, stderr } = await exec(
-        `npm i `
+        `npm i `, {cwd: resolve(process.cwd(), configChoice.projectName)}
       );
       MessageUtil.info(stdout);
       if (stderr) MessageUtil.info(stderr);
