@@ -1,10 +1,10 @@
 {
   "name": "create-nest-architect",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice and orm or odm configured",
   "main": "index.js",
   "bin": {
-     "create-nest-architect": "./dist/index.js"
+    "create-nest-architect": "./dist/index.js"
   },
   "scripts": {
     "build": "npx tsx scripts/build.ts",
