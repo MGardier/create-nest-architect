@@ -4,7 +4,7 @@
   "description": "A simple CLI that creates a new project for NestJS with an architecture of your choice and orm or odm configured",
   "main": "index.js",
   "bin": {
-    "my-nest-cli": "./dist/index.js"
+     "create-nest-architect": "./dist/index.js"
   },
   "scripts": {
     "build": "npx tsx scripts/build.ts",
