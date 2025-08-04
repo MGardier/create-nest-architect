@@ -21,7 +21,7 @@ export abstract class FsUtil {
 
   static async deleteDirectory(filePath: string): Promise<void> {
     const targetFile = resolve(process.cwd(), filePath);
-    await fs.rm(targetFile,{recursive: true});
+    await fs.rm(targetFile,{recursive: true}); // recursive => create folder if not existing
     MessageUtil.success(`File deleted at: ${targetFile}`);
   }
 

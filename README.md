@@ -1,6 +1,6 @@
 # nest-architect
 
-[![npm version](https://badge.fury.io/js/nest-architect.svg)](https://www.npmjs.com/package/nest-architect)
+[![npm version](https://badge.fury.io/js/nest-architect.svg)](https://www.npmjs.com/package/create-nest-architect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <img src="https://nestjs.com/img/logo-small.svg" width="100" alt="Nest Logo" />
@@ -110,9 +110,9 @@ Missing an architecture pattern or ORM/ODM? Open an issue or submit a PR.
 ## Thanks
 
 - [Mehdi Larek](https://github.com/LarekMehdi)
-- [Amine SERRA](https://linkedin.com/in/amine-serra-5105b5252/)
+- [Amine Serra](https://linkedin.com/in/amine-serra-5105b5252/)
 - [Florian Forlini](https://www.linkedin.com/in/florianforlini/)
 
 ## License
 
-MIT © [Your Name]
+MIT ©
