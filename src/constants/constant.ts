@@ -39,18 +39,34 @@ export abstract class Constant {
 
   static getKeyDisplay(key: string): string {
     switch (key) {
+
+      /**** ARCHITECTURE ******/
       case ARCHITECTURE_TYPE.CLEAN:
         return "🏛️   Clean Architecture";
       case ARCHITECTURE_TYPE.FEATURED:
         return "🏷️   Featured Architecture";
+
+      /**** DB ******/
       case DB_LANGUAGE.SQL:
         return "🗃️    Sql";
       case DB_LANGUAGE.NOSQL:
         return "📦   NoSql";
+
+      /**** ORM & ODM ******/
       case ODM_TYPE.MONGOOSE:
         return "📦   Mongoose";
       case ORM_TYPE.PRISMA:
         return "📦   Prisma";
+
+      /**** PACKAGER ******/
+      case "NPM":
+        return "📦   npm";
+      case "PNPM":
+        return "⚡   pnpm";
+      case "YARN":
+        return "🧶   Yarn";
+      case "BUN":
+        return "🍞   Bun";
       default:
         return key;
     }

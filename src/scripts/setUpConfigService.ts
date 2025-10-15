@@ -14,7 +14,7 @@ export abstract class SetUpConfig {
   static async exec(configChoice: ConfigChoice): Promise<void> {
     MessageUtil.info('\nInstalling NestJs Config...');
     const targetDir = resolve(process.cwd(), configChoice.projectName);
-    await this.installConfig(targetDir);
+    await this.installConfig(targetDir, configChoice);
 
     if (configChoice.isArchitectureTypeFeatured())
       await this.setUpConfigFeatured(targetDir);
@@ -40,10 +40,12 @@ export abstract class SetUpConfig {
 
 
 
-  /********************** PRISMA  METHOD   ******************************** **********************************************************************/
-  static async installConfig(targetDir: string): Promise<void> {
+  /********************** INSTALLATION  METHOD   ******************************** **********************************************************************/
+  static async installConfig(targetDir: string, configChoice: ConfigChoice): Promise<void> {
     const exec = promisify(execCb);
-    await exec(`npm i  @nestjs/config`, {
+    const { packager } = configChoice;
+
+    await exec(packager.add('@nestjs/config'), {
       cwd: targetDir,
       shell: "/bin/bash"
     });

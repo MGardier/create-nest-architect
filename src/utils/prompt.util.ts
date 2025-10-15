@@ -6,6 +6,7 @@ import {
   ODM_TYPE,
   ORM_TYPE,
 } from "../constants/constant";
+import { PACKAGER_TYPE } from "../constants/packager.constants";
 import { ChoiceUtil } from "./choice.util";
 
 /************************ GENERIC METHODS ***********************************/
@@ -103,6 +104,18 @@ export abstract class PromptUtil {
       "answer"
     );
     return answer as ODM_TYPE;
+  }
+
+  /********************** PACKAGER  ******************************** */
+  static async askPackager(): Promise<PACKAGER_TYPE> {
+    const choices: AskChoiceInterface[] = ChoiceUtil.getPackagerChoices();
+    const { answer } = await this.askUserWithChoices(
+      "Which package manager would you like to use?",
+      choices,
+      "select",
+      "answer"
+    );
+    return answer as PACKAGER_TYPE;
   }
 
 }

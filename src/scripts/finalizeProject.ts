@@ -12,28 +12,29 @@ export abstract class FinalizeProject {
 
     static async exec(configChoice: ConfigChoice): Promise<void> {
       const targetDir = resolve(process.cwd(), configChoice.projectName);
+      await this.cleanPackageLockJson(targetDir, configChoice);
       await this.installDependencies(targetDir,configChoice);
       await this.removeDotGit(targetDir);
 
   }
-  /********************** CLONE REPOSITORY  ******************************** */
+  /********************** INSTALL DEPENDENCIES  ******************************** */
   static async installDependencies(targetDir: string, configChoice: ConfigChoice): Promise<void> {
 
-
-
-    MessageUtil.info("\nInstall dependecies ....");
+    MessageUtil.info("\nInstalling dependencies...");
     const exec = promisify(execCb);
+    const { packager } = configChoice;
+
     try {
       const { stdout, stderr } = await exec(
-        `npm i `, {cwd: targetDir}
+        packager.install, {cwd: targetDir}
       );
-      
+
       MessageUtil.info(stdout);
       if (stderr) MessageUtil.info(stderr);
-      MessageUtil.success("Dependencies successfully  installed")
+      MessageUtil.success("Dependencies successfully installed")
     } catch (err) {
       console.info(err)
-      MessageUtil.error("An error occurred when try to install dependencies, please make it manually.");
+      MessageUtil.error("An error occurred when trying to install dependencies, please do it manually.");
       process.exit(1);
 
 
@@ -46,6 +47,23 @@ export abstract class FinalizeProject {
 
   }
 
+  /********************** CLEAN PACKAGE LOCK JSON  ******************************** */
+  static async cleanPackageLockJson(targetDir: string, configChoice: ConfigChoice): Promise<void> {
+    const { packager } = configChoice;
+
+    // Si le packager choisi n'est pas npm, supprimer package-lock.json du template
+    if (packager.lockfile !== 'package-lock.json') {
+      const packageLockPath = join(targetDir, 'package-lock.json');
+      try {
+        await FsUtil.deleteDirectory(packageLockPath);
+        MessageUtil.info('Removed npm package-lock.json from template');
+      } catch (err) {
+        // Fichier n'existe pas, pas grave
+      }
+    }
+  }
+
+  /********************** REMOVE DOT GIT  ******************************** */
   static async removeDotGit(targetDir : string){
     await FsUtil.deleteDirectory(join(targetDir,'.git'));
   }

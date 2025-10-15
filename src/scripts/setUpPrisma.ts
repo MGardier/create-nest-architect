@@ -14,7 +14,7 @@ export abstract class SetUpPrisma {
     MessageUtil.info('\nInstalling Prisma...');
     const targetDir = resolve(process.cwd(), configChoice.projectName);
 
-    await this.installPrisma(targetDir);
+    await this.installPrisma(targetDir, configChoice);
 
     if (configChoice.isArchitectureTypeClean()) {
       await this.setUpPrismaClean(targetDir, configChoice);
@@ -111,12 +111,12 @@ export abstract class SetUpPrisma {
 
   /********************** INSTALL  METHOD   ******************************** **********************************************************************/
 
-  static async installPrisma(targetDir: string): Promise<void> {
+  static async installPrisma(targetDir: string, configChoice: ConfigChoice): Promise<void> {
 
     const exec = promisify(execCb);
-    
+    const { packager } = configChoice;
 
-    await exec(`npm install prisma @prisma/client && npx prisma init`, {
+    await exec(`${packager.add('prisma @prisma/client')} && ${packager.exec('prisma init')}`, {
       cwd: targetDir,
       shell: "/bin/bash"
     });

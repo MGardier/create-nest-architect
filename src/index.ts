@@ -17,6 +17,7 @@ import { MessageUtil } from "./utils/message.util";
 export const setUpProject = async () => {
 
   const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
+
   await InitProject.cloneRepo(configChoice);
 
   let ormOrOdmMessage: string;

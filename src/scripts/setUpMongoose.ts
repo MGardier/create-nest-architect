@@ -12,7 +12,7 @@ export abstract class SetUpMongoose {
     static async exec(configChoice: ConfigChoice): Promise<string> {
         MessageUtil.info('\nInstalling Mongoose...');
         const targetDir = resolve(process.cwd(), configChoice.projectName);
-        await this.installMongoose(targetDir);
+        await this.installMongoose(targetDir, configChoice);
         if (configChoice.isArchitectureTypeClean()) {
             await this.setUpMongooseClean(targetDir, configChoice);
         }
@@ -101,10 +101,11 @@ export abstract class SetUpMongoose {
 
 
     /********************** INSTALL METHOD   ******************************** **********************************************************************/
-    static async installMongoose(targetDir: string) {
+    static async installMongoose(targetDir: string, configChoice: ConfigChoice) {
         const exec = promisify(execCb);
-        
-        await exec(`npm i @nestjs/mongoose mongoose`, {
+        const { packager } = configChoice;
+
+        await exec(packager.add('@nestjs/mongoose mongoose'), {
             cwd: targetDir,
             shell: "/bin/bash"
         });
