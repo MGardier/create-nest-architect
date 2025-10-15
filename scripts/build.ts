@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 console.log('Building create-nest-architect...');
@@ -9,6 +9,10 @@ console.log('Building create-nest-architect...');
 
 console.log(' Compiling TypeScript...');
 execSync('npx tsc', { stdio: 'inherit' });
+
+console.log(' Setting executable permissions...');
+chmodSync('./dist/index.js', 0o755);
+console.log(' dist/index.js is now executable');
 
 
 function copyRecursive(src: string, dest: string): void {

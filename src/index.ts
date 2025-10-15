@@ -9,27 +9,19 @@ import { SetUpConfig } from './scripts/setUpConfigService';
 import { FinalizeProject } from "./scripts/finalizeProject";
 import { MessageUtil } from "./utils/message.util";
 
-//TODO : Supprimer le .git du template
-//TODO : Modifier le readme des templates 
 
 
-//TODO : v2 tester et gestions des erreurs
-//TODO : v2 Ajouter des architectures
-//TODO : v2 Ajouter des ORM
-//TODO : v2 Pouvoir choisir son package
-//TODO : v2 setUp Docker 
-//TODO : v3 add new resource command
 
 
 
 export const setUpProject = async () => {
-  
+
   const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
   await InitProject.cloneRepo(configChoice);
 
-  let ormOrOdmMessage: string; 
+  let ormOrOdmMessage: string;
   switch (configChoice.ormOrOdm) {
-    
+
     case ORM_TYPE.PRISMA: {
       ormOrOdmMessage = await SetUpPrisma.exec(configChoice);
       break;
@@ -39,13 +31,16 @@ export const setUpProject = async () => {
       ormOrOdmMessage = await SetUpMongoose.exec(configChoice);
       break;
     }
+    default:
+      MessageUtil.error(`Unsupported ORM/ODM type: ${configChoice.ormOrOdm}`);
+      process.exit(1);
   }
 
   await SetUpConfig.exec(configChoice);
   await FinalizeProject.exec(configChoice);
-  
 
-MessageUtil.success(`\nProject ${configChoice.projectName} was successfully installed and configured.`);
+
+  MessageUtil.success(`\nProject ${configChoice.projectName} was successfully installed and configured.`);
   MessageUtil.info(`\n
     ${ormOrOdmMessage}
 
@@ -58,4 +53,4 @@ MessageUtil.success(`\nProject ${configChoice.projectName} was successfully inst
   `);
 };
 
- setUpProject();
+setUpProject();

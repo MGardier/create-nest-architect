@@ -1,5 +1,3 @@
-
-import { promises as fs } from "fs";
 export enum ARCHITECTURE_TYPE {
 
   FEATURED = "FEATURED",
@@ -39,8 +37,6 @@ export enum REPO_TEMPLATE_URL {
 
 export abstract class Constant {
 
-
-
   static getKeyDisplay(key: string): string {
     switch (key) {
       case ARCHITECTURE_TYPE.CLEAN:
@@ -59,7 +55,5 @@ export abstract class Constant {
         return key;
     }
   }
-
-
 
 }

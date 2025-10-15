@@ -4,9 +4,7 @@ import {
   ODM_TYPE,
   ORM_TYPE,
   REPO_TEMPLATE_URL,
-  TEMPLATE_PATH,
 } from "../constants/constant";
-import { promises as fs } from "fs";
 import { PromptUtil } from "../utils/prompt.util";
 import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
@@ -34,7 +32,7 @@ export abstract class InitProject {
       if (stderr) MessageUtil.info(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-      MessageUtil.error("An error append when try to git clone template, please check that a project does not already exist and git works.");
+      MessageUtil.error("An error occurred when trying to git clone template, please check that a project does not already exist and git works.");
       process.exit(1);
     }
   }

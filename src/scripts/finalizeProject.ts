@@ -30,10 +30,10 @@ export abstract class FinalizeProject {
       
       MessageUtil.info(stdout);
       if (stderr) MessageUtil.info(stderr);
-      MessageUtil.success("Depencies successfully  installed")
+      MessageUtil.success("Dependencies successfully  installed")
     } catch (err) {
       console.info(err)
-      MessageUtil.error("An error append when try to install depencies, please make it manually.");
+      MessageUtil.error("An error occurred when try to install dependencies, please make it manually.");
       process.exit(1);
 
 

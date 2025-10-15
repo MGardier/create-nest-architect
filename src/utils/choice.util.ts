@@ -1,4 +1,3 @@
-import prompts, { PromptType } from "prompts";
 import { AskChoiceInterface } from "../interfaces/askChoice.interface";
 import {
   ARCHITECTURE_TYPE,
