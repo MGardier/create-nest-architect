@@ -1,4 +1,3 @@
-import prompts, { PromptType } from "prompts";
 import { AskChoiceInterface } from "../interfaces/askChoice.interface";
 import {
   ARCHITECTURE_TYPE,
@@ -7,6 +6,7 @@ import {
   ODM_TYPE,
   ORM_TYPE,
 } from "../constants/constant";
+import { PACKAGER_TYPE } from "../constants/packager.constants";
 
 export abstract class ChoiceUtil {
   static getArchitectureChoices(): AskChoiceInterface[] {
@@ -47,5 +47,25 @@ export abstract class ChoiceUtil {
       value: ODM_TYPE.MONGOOSE,
     };
     return [mongoose];
+  }
+
+  static getPackagerChoices(): AskChoiceInterface[] {
+    const npm: AskChoiceInterface = {
+      title: Constant.getKeyDisplay(PACKAGER_TYPE.NPM),
+      value: PACKAGER_TYPE.NPM,
+    };
+    const pnpm: AskChoiceInterface = {
+      title: Constant.getKeyDisplay(PACKAGER_TYPE.PNPM),
+      value: PACKAGER_TYPE.PNPM,
+    };
+    const yarn: AskChoiceInterface = {
+      title: Constant.getKeyDisplay(PACKAGER_TYPE.YARN),
+      value: PACKAGER_TYPE.YARN,
+    };
+    const bun: AskChoiceInterface = {
+      title: Constant.getKeyDisplay(PACKAGER_TYPE.BUN),
+      value: PACKAGER_TYPE.BUN,
+    };
+    return [npm, pnpm, yarn, bun];
   }
 }

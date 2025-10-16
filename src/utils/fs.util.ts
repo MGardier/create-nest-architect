@@ -19,6 +19,12 @@ export abstract class FsUtil {
     }
   }
 
+  static async deleteDirectory(filePath: string): Promise<void> {
+    const targetFile = resolve(process.cwd(), filePath);
+    await fs.rm(targetFile,{recursive: true}); // recursive => create folder if not existing
+    MessageUtil.success(`File deleted at: ${targetFile}`);
+  }
+
   /**********************  FILE METHOD   *************************************************************************************************************/
 
   static async createFile(filePath: string, content: string): Promise<void> {
@@ -26,6 +32,8 @@ export abstract class FsUtil {
     await fs.writeFile(targetFile, content, "utf8");
     MessageUtil.success(`File created at: ${targetFile}`);
   }
+
+
 
   static async getFileContent(filePath: string): Promise<string> {
     return await fs.readFile(filePath, 'utf-8');
@@ -50,7 +58,7 @@ export abstract class FsUtil {
   }
 
 
-  /********************** ADD NEW MODULE METHOD   *************************************************************************************************************/
+  /********************** PRISMA ADD NEW MODULE  METHOD   *************************************************************************************************************/
 
   static addNewModuleClean(content: string, importFile: string, importModule: string): string {
     const result = content.replace(
@@ -84,11 +92,21 @@ export abstract class FsUtil {
 
 
   /********************** PACKAGE JSON  METHOD   *************************************************************************************************************/
+
+  static extractProjectNameFromPath(projectName: string): string {
+    if (projectName.includes('/') || projectName.includes('\\')) {
+      const segments = projectName.split(/[/\\]/);
+      return segments[segments.length - 1];
+    }
+    return projectName;
+  }
+
   static updateProjectNameInPackageJson(content: string, projectName: string,): string {
+    const cleanProjectName = FsUtil.extractProjectNameFromPath(projectName);
 
     return content.replace(
       /("name"\s*:\s*)"[^"]*"/g,
-      `$1"${projectName}"`
+      `$1"${cleanProjectName}"`
     );
 
   }

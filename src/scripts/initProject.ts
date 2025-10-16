@@ -4,9 +4,7 @@ import {
   ODM_TYPE,
   ORM_TYPE,
   REPO_TEMPLATE_URL,
-  TEMPLATE_PATH,
 } from "../constants/constant";
-import { promises as fs } from "fs";
 import { PromptUtil } from "../utils/prompt.util";
 import { MessageUtil } from "../utils/message.util";
 import { ConfigChoice } from "../classes/configChoice.class";
@@ -25,7 +23,6 @@ export abstract class InitProject {
     const projectName: string = configChoice.projectName;
 
     const exec = promisify(execCb);
-
     try {
       const { stdout, stderr } = await exec(
         `git clone --depth 1 --branch main ${templateRepo} ${projectName}`
@@ -34,19 +31,28 @@ export abstract class InitProject {
       if (stderr) MessageUtil.info(stderr);
       MessageUtil.success("Successfully cloned the repository")
     } catch (err) {
-      MessageUtil.error("An error append when try to git clone template, please check that a project does not already exist and git works.");
+      console.log(err)
+      MessageUtil.error("An error occurred when trying to git clone template, please check that a project does not already exist and git works.");
       process.exit(1);
     }
   }
 
   static async collectProjectConfig(): Promise<ConfigChoice> {
-    
+
     /********************** PROJECT NAME  ******************************** */
     const projectName = await PromptUtil.askProjectNameIfNeeded();
     if (!projectName) {
       MessageUtil.error("You must specify a name to create project.");
       process.exit(1);
     }
+
+    /********************** PACKAGER  ******************************** */
+    const packagerType = await PromptUtil.askPackager();
+    if (!packagerType) {
+      MessageUtil.error("You must choose a package manager.");
+      process.exit(1);
+    }
+
     /********************** ARCHITECTURE  ******************************** */
     const architectureType = await PromptUtil.askArchitecture();
     if (!architectureType) {
@@ -73,6 +79,7 @@ export abstract class InitProject {
     }
     return new ConfigChoice(
       projectName,
+      packagerType,
       architectureType,
       dbLanguage,
       ormOrOdm

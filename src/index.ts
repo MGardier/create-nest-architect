@@ -2,35 +2,26 @@
 
 import { ConfigChoice } from "./classes/configChoice.class";
 import { ODM_TYPE, ORM_TYPE } from "./constants/constant";
+import { PACKAGER_TYPE } from "./constants/packager.constants";
 import { InitProject } from "./scripts/initProject";
 import { SetUpMongoose } from "./scripts/setUpMongoose";
 import { SetUpPrisma } from "./scripts/setUpPrisma";
 import { SetUpConfig } from './scripts/setUpConfigService';
 import { FinalizeProject } from "./scripts/finalizeProject";
 import { MessageUtil } from "./utils/message.util";
-
-//TODO :v1 Modifier le package.json avec le nom du projet 
-//TODO:v1 Ajouter les keywords de la librairie
-
-//TODO :v1 Ajout ReadMe
-
-//TODO : v2 tester et gestions des erreurs
-//TODO : v2 Ajouter des architectures
-//TODO : v2 Ajouter des ORM
-//TODO : v2 Pouvoir choisir son package
-//TODO : v2 setUp Docker 
-//TODO : v3 add new resource command
+import { FsUtil } from "./utils/fs.util";
 
 
 
 export const setUpProject = async () => {
-  
+
   const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
+
   await InitProject.cloneRepo(configChoice);
 
-  let ormOrOdmMessage: string; 
+  let ormOrOdmMessage: string;
   switch (configChoice.ormOrOdm) {
-    
+
     case ORM_TYPE.PRISMA: {
       ormOrOdmMessage = await SetUpPrisma.exec(configChoice);
       break;
@@ -40,23 +31,35 @@ export const setUpProject = async () => {
       ormOrOdmMessage = await SetUpMongoose.exec(configChoice);
       break;
     }
+    default:
+      MessageUtil.error(`Unsupported ORM/ODM type: ${configChoice.ormOrOdm}`);
+      process.exit(1);
   }
 
   await SetUpConfig.exec(configChoice);
-  await FinalizeProject.installDependencies(configChoice);
+  await FinalizeProject.exec(configChoice);
+
+  const { packager } = configChoice;
+  const startCommand = packager.run('start dev ');
+
+  
+  let pnpmMessage = '';
+  if (configChoice.packagerType === PACKAGER_TYPE.PNPM) 
+    pnpmMessage = `\n    ⚠️  Don't forget to approve builds with:\n    $ pnpm approve-builds\n`;
   
 
-MessageUtil.success(`\nProject ${configChoice.projectName} was successfully installed and configured.`);
+  MessageUtil.success(`\nProject ${FsUtil.extractProjectNameFromPath(configChoice.projectName)} was successfully installed and configured.`);
   MessageUtil.info(`\n
     ${ormOrOdmMessage}
 
     👉  Get started with the following commands:
 
-    $ cd ${configChoice.projectName}
-    $ npm run start
+    $ cd ${configChoice.projectName}${pnpmMessage}
+    $ ${startCommand}
 
-    
+
   `);
 };
 
- setUpProject();
+
+setUpProject();

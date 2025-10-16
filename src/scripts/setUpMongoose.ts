@@ -12,7 +12,7 @@ export abstract class SetUpMongoose {
     static async exec(configChoice: ConfigChoice): Promise<string> {
         MessageUtil.info('\nInstalling Mongoose...');
         const targetDir = resolve(process.cwd(), configChoice.projectName);
-        await this.installMongoose(targetDir);
+        await this.installMongoose(targetDir, configChoice);
         if (configChoice.isArchitectureTypeClean()) {
             await this.setUpMongooseClean(targetDir, configChoice);
         }
@@ -24,7 +24,7 @@ export abstract class SetUpMongoose {
     👉 Before starting dont forget to : 
     
       - Create .env and connect your MongoDB with Mongoose.
-      - Add your with your entites and modules with mongoose.
+      - Add your entites and modules with mongoose.
     `;
     }
 
@@ -50,7 +50,7 @@ export abstract class SetUpMongoose {
         MessageUtil.info(`\nUpdating app module...`);
         const appModulePath = `${targetDir}/src/app.module.ts`;
         let appModuleContent = await FsUtil.getFileContent(appModulePath);
-        appModuleContent = await FsUtil.addNewModuleClean(
+        appModuleContent =  FsUtil.addNewModuleClean(
             appModuleContent,
             `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
             `MongooseModule`
@@ -93,7 +93,7 @@ export abstract class SetUpMongoose {
         const mongooseImportModule: string = `MongooseModule.forRoot(process.env.DATABASE_URL || ${dbUrl})`;
         const newAppModuleContent = FsUtil.addNewModuleFeatured(currentAppModuleContent, "import { MongooseModule } from '@nestjs/mongoose'", mongooseImportModule);
         await FsUtil.createFile(appModulePath, newAppModuleContent);
-        MessageUtil.success(`Mongoose module  correctly generating and app module correctly updated.`);
+        MessageUtil.success(`Mongoose module correctly generating and app module correctly updated.`);
 
         FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "mongodb://username:password@host:port/db?authSource=admin");
     }
@@ -101,10 +101,11 @@ export abstract class SetUpMongoose {
 
 
     /********************** INSTALL METHOD   ******************************** **********************************************************************/
-    static async installMongoose(targetDir: string) {
+    static async installMongoose(targetDir: string, configChoice: ConfigChoice) {
         const exec = promisify(execCb);
-        
-        await exec(`npm i @nestjs/mongoose mongoose`, {
+        const { packager } = configChoice;
+
+        await exec(packager.add('@nestjs/mongoose mongoose'), {
             cwd: targetDir,
             shell: "/bin/bash"
         });

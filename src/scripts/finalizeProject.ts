@@ -3,39 +3,69 @@ import { MessageUtil } from "../utils/message.util";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
 import { FsUtil } from "../utils/fs.util";
-import { ConfigChoice } from "../classes/configChoice.class";
-import { resolve } from "path";
+import { ConfigChoice } from '../classes/configChoice.class';
+import { join, resolve } from "path";
 
 
 export abstract class FinalizeProject {
 
-  /********************** CLONE REPOSITORY  ******************************** */
-  static async installDependencies(configChoice: ConfigChoice): Promise<void> {
 
-    MessageUtil.info("\nInstall dependecies ....");
+    static async exec(configChoice: ConfigChoice): Promise<void> {
+      const targetDir = resolve(process.cwd(), configChoice.projectName);
+      await this.cleanPackageLockJson(targetDir, configChoice);
+      await this.installDependencies(targetDir,configChoice);
+      await this.removeDotGit(targetDir);
+
+  }
+  /********************** INSTALL DEPENDENCIES  ******************************** */
+  static async installDependencies(targetDir: string, configChoice: ConfigChoice): Promise<void> {
+
+    MessageUtil.info("\nInstalling dependencies...");
     const exec = promisify(execCb);
+    const { packager } = configChoice;
 
     try {
       const { stdout, stderr } = await exec(
-        `npm i `, {cwd: resolve(process.cwd(), configChoice.projectName)}
+        packager.install, {cwd: targetDir}
       );
+
       MessageUtil.info(stdout);
       if (stderr) MessageUtil.info(stderr);
-      MessageUtil.success("Depencies successfully  installed")
+      MessageUtil.success("Dependencies successfully installed")
     } catch (err) {
-      MessageUtil.error("An error append when try to install depencies, please make it manually.");
+      console.info(err)
+      MessageUtil.error("An error occurred when trying to install dependencies, please do it manually.");
       process.exit(1);
 
 
 
     }
-    const packageJsonPath = `${resolve(process.cwd(), configChoice.projectName)}/package.json`;
+    const packageJsonPath = `${targetDir}/package.json`;
     let packageJsonContent = await FsUtil.getFileContent(packageJsonPath);
-    packageJsonContent=  await FsUtil.updateProjectNameInPackageJson(packageJsonContent, configChoice.projectName)
+    packageJsonContent=   FsUtil.updateProjectNameInPackageJson(packageJsonContent, configChoice.projectName)
     await FsUtil.createFile(packageJsonPath, packageJsonContent);
 
   }
 
+  /********************** CLEAN PACKAGE LOCK JSON  ******************************** */
+  static async cleanPackageLockJson(targetDir: string, configChoice: ConfigChoice): Promise<void> {
+    const { packager } = configChoice;
+
+    if (packager.lockfile !== 'package-lock.json') {
+      const packageLockPath = join(targetDir, 'package-lock.json');
+      try {
+        await FsUtil.deleteDirectory(packageLockPath);
+        MessageUtil.info('Removed npm package-lock.json from template');
+      } catch (err) {
+          MessageUtil.info('package-lock.json not found or already removed');
+      }
+    }
+  }
+
+  /********************** REMOVE DOT GIT  ******************************** */
+  static async removeDotGit(targetDir : string){
+    await FsUtil.deleteDirectory(join(targetDir,'.git'));
+  }
 
 
 }
