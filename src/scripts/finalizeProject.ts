@@ -42,7 +42,7 @@ export abstract class FinalizeProject {
     }
     const packageJsonPath = `${targetDir}/package.json`;
     let packageJsonContent = await FsUtil.getFileContent(packageJsonPath);
-    packageJsonContent=  await FsUtil.updateProjectNameInPackageJson(packageJsonContent, FsUtil.extractProjectNameFromPath(configChoice.projectName))
+    packageJsonContent=   FsUtil.updateProjectNameInPackageJson(packageJsonContent, configChoice.projectName)
     await FsUtil.createFile(packageJsonPath, packageJsonContent);
 
   }
@@ -57,6 +57,7 @@ export abstract class FinalizeProject {
         await FsUtil.deleteDirectory(packageLockPath);
         MessageUtil.info('Removed npm package-lock.json from template');
       } catch (err) {
+          MessageUtil.info('package-lock.json not found or already removed');
       }
     }
   }

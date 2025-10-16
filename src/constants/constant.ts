@@ -1,3 +1,5 @@
+import { PACKAGER_TYPE } from "./packager.constants";
+
 export enum ARCHITECTURE_TYPE {
 
   FEATURED = "FEATURED",
@@ -28,7 +30,6 @@ export enum TEMPLATE_PATH {
 
 export enum REPO_TEMPLATE_URL {
   CLEAN = "https://github.com/MGardier/create-nest-architect-template-clean.git",
-
   FEATURED = "https://github.com/MGardier/create-nest-architect-template-featured.git",
 
 }
@@ -59,13 +60,13 @@ export abstract class Constant {
         return "📦   Prisma";
 
       /**** PACKAGER ******/
-      case "NPM":
+      case PACKAGER_TYPE.NPM:
         return "📦   npm";
-      case "PNPM":
+      case PACKAGER_TYPE.PNPM:
         return "⚡   pnpm";
-      case "YARN":
+      case PACKAGER_TYPE.YARN:
         return "🧶   Yarn";
-      case "BUN":
+      case PACKAGER_TYPE.BUN:
         return "🍞   Bun";
       default:
         return key;

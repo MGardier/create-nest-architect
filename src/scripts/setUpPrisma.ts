@@ -24,12 +24,12 @@ export abstract class SetUpPrisma {
     }
     
     return `
-    👉 Before starting dont forget to : 
+    👉 Before starting don't forget to : 
 
       - Create .env and connect your provider with Prisma.
-      - Update schema prisma with your entites.
+      - Update schema prisma with your entities.
       - Generate prisma client and database with :
-        $ npx prisma migrate dev
+        $ ${configChoice.packager.exec('prisma migrate dev')}
     `;
   }
 
@@ -59,7 +59,7 @@ export abstract class SetUpPrisma {
     const appModulePath = join(targetDir, '/src/app.module.ts');
     let appModuleContent = await FsUtil.getFileContent(appModulePath);
 
-    appModuleContent = await FsUtil.addNewModuleClean(
+    appModuleContent =  FsUtil.addNewModuleClean(
       appModuleContent,
       `import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module'`,
       `PrismaModule`
@@ -70,10 +70,10 @@ export abstract class SetUpPrisma {
     const prismaConfigPath = join(targetDir, '/prisma.config.ts');
     let prismaConfigContent = await FsUtil.getFileContent(prismaConfigPath);
 
-    prismaConfigContent = await FsUtil.addOptionInPrismaConfig(prismaConfigContent, "  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
+    prismaConfigContent =  FsUtil.addOptionInPrismaConfig(prismaConfigContent, "  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
     await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
 
-    MessageUtil.success(`\nPrisma module  correctly generating and AppModule  correctly updated.`);
+    MessageUtil.success(`\nPrisma module correctly generating and AppModule  correctly updated.`);
 
 
     FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "provider://user:password@host:port/database");
@@ -101,7 +101,7 @@ export abstract class SetUpPrisma {
     appModuleContent = FsUtil.addNewModuleFeatured(appModuleContent, "import { PrismaModule } from 'prisma/prisma.module'", "PrismaModule")
     await FsUtil.createFile(appModulePath, appModuleContent);
 
-    MessageUtil.success(`\nPrisma folder  correctly generating and AppModule  correctly updated.`);
+    MessageUtil.success(`\nPrisma folder correctly generating and AppModule  correctly updated.`);
 
     FsUtil.updateEnvExampleIfNeeded(configChoice.projectName, "DATABASE_URL", "provider://user:password@host:port/database");
 
