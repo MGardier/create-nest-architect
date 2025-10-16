@@ -58,7 +58,7 @@ export abstract class FsUtil {
   }
 
 
-  /********************** ADD NEW MODULE METHOD   *************************************************************************************************************/
+  /********************** PRISMA ADD NEW MODULE  METHOD   *************************************************************************************************************/
 
   static addNewModuleClean(content: string, importFile: string, importModule: string): string {
     const result = content.replace(
@@ -92,11 +92,21 @@ export abstract class FsUtil {
 
 
   /********************** PACKAGE JSON  METHOD   *************************************************************************************************************/
+
+  static extractProjectNameFromPath(projectName: string): string {
+    if (projectName.includes('/') || projectName.includes('\\')) {
+      const segments = projectName.split(/[/\\]/);
+      return segments[segments.length - 1];
+    }
+    return projectName;
+  }
+
   static updateProjectNameInPackageJson(content: string, projectName: string,): string {
+    const cleanProjectName = FsUtil.extractProjectNameFromPath(projectName);
 
     return content.replace(
       /("name"\s*:\s*)"[^"]*"/g,
-      `$1"${projectName}"`
+      `$1"${cleanProjectName}"`
     );
 
   }
