@@ -32,7 +32,7 @@ export interface CliRunResult {
 
 /********************** CLI RUNNER  ******************************** */
 
-const CLI_BIN = resolve(__dirname, "../../../dist/index.js");
+const CLI_BIN = resolve(__dirname, "../../../dist/cli.js");
 const ANSI_PATTERN = /\x1B\[[0-9;]*[A-Za-z]/g;
 
 /** Creates the temporary directory the CLI will be executed in. */

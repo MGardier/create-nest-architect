@@ -11,8 +11,8 @@ console.log(' Compiling TypeScript...');
 execSync('npx tsc', { stdio: 'inherit' });
 
 console.log(' Setting executable permissions...');
-chmodSync('./dist/index.js', 0o755);
-console.log(' dist/index.js is now executable');
+chmodSync('./dist/cli.js', 0o755);
+console.log(' dist/cli.js is now executable');
 
 
 function copyRecursive(src: string, dest: string): void {
