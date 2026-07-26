@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import { ConfigChoice } from "./classes/configChoice.class";
+import { PartialConfig } from "./config/config.types";
+import { collectConfig } from "./config/questions";
 import { PACKAGER_TYPE } from "./constants/packager.constants";
-import { InitProject } from "./scripts/initProject";
 import { runPipeline } from "./pipeline";
 import { MessageUtil } from "./utils/message.util";
 import { FsUtil } from "./utils/fs.util";
@@ -10,7 +11,10 @@ import { FsUtil } from "./utils/fs.util";
 
 const main = async () => {
 
-  const configChoice: ConfigChoice = await InitProject.collectProjectConfig();
+  // Reading argv is the CLI's job: pre-filled answers make the matching questions skipped
+  const initial: PartialConfig = process.argv[2] ? { projectName: process.argv[2] } : {};
+
+  const configChoice: ConfigChoice = await collectConfig(initial);
 
   const ormOrOdmMessage: string = await runPipeline(configChoice);
 

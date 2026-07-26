@@ -1,9 +1,6 @@
-export enum PACKAGER_TYPE {
-  NPM = "NPM",
-  PNPM = "PNPM",
-  YARN = "YARN",
-  BUN = "BUN",
-}
+import { PACKAGER_TYPE } from "../config/choices";
+
+export { PACKAGER_TYPE };
 
 /********************** INTERFACE *************************************************************************************************************/
 
