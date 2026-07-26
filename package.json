@@ -13,6 +13,8 @@
   "scripts": {
     "build": "npx tsx scripts/build.ts",
     "dev": "npx tsx src/index.ts",
+    "typecheck:tests": "npx tsc --noEmit -p tsconfig.tests.json",
+    "test:e2e": "npm run build && npm run typecheck:tests && npx tsx --test tests/e2e/scaffold.e2e.test.ts",
     "prepublishOnly": "npm run build"
   },
   "author": "Maxime Gardier",
