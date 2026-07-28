@@ -1,36 +1,34 @@
-import { ConfigChoice } from "./classes/configChoice.class";
-import { ODM_TYPE, ORM_TYPE } from "./constants/constant";
-import { InitProject } from "./scripts/initProject";
-import { SetUpMongoose } from "./scripts/setUpMongoose";
-import { SetUpPrisma } from "./scripts/setUpPrisma";
-import { SetUpConfig } from "./scripts/setUpConfigService";
-import { FinalizeProject } from "./scripts/finalizeProject";
-import { MessageUtil } from "./utils/message.util";
+import { ConfigChoice } from "./config/config.types";
+import { finalizeStep } from "./steps/finalize.step";
+import { loadTemplateStep } from "./steps/load-template.step";
+import { ormStep } from "./steps/orm.step";
+import type { Step } from "./steps/step.types";
 
+/**
+ * The execution sequence as data, mirroring questions[] in questions.ts:
+ * adding / reordering / conditioning a step = editing this array.
+ */
+const pipeline: Step[] = [
+  loadTemplateStep,
+  ormStep,
+  finalizeStep,
+];
 
-export const runPipeline = async (configChoice: ConfigChoice): Promise<string> => {
+/**
+ * Runs each step of pipeline[] in order, skipping those whose `when`
+ * condition returns false, and collects the "next steps" messages the
+ * steps return for the final recap. No prompt, no console.log here.
+ */
+export const runPipeline = async (config: ConfigChoice): Promise<string[]> => {
 
-  await InitProject.cloneRepo(configChoice);
+  const messages: string[] = [];
 
-  let ormOrOdmMessage: string;
-  switch (configChoice.ormOrOdm) {
+  for (const step of pipeline) {
+    if (step.when && !step.when(config)) continue;
 
-    case ORM_TYPE.PRISMA: {
-      ormOrOdmMessage = await SetUpPrisma.exec(configChoice);
-      break;
-    }
-
-    case ODM_TYPE.MONGOOSE: {
-      ormOrOdmMessage = await SetUpMongoose.exec(configChoice);
-      break;
-    }
-    default:
-      MessageUtil.error(`Unsupported ORM/ODM type: ${configChoice.ormOrOdm}`);
-      process.exit(1);
+    const message = await step.run(config);
+    if (message) messages.push(message);
   }
 
-  await SetUpConfig.exec(configChoice);
-  await FinalizeProject.exec(configChoice);
-
-  return ormOrOdmMessage;
+  return messages;
 };

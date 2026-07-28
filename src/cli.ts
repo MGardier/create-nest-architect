@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-import { ConfigChoice } from "./classes/configChoice.class";
-import { PartialConfig } from "./config/config.types";
+import { PACKAGER_TYPE } from "./config/choices";
+import { ConfigChoice, PartialConfig } from "./config/config.types";
 import { collectConfig } from "./config/questions";
-import { PACKAGER_TYPE } from "./constants/packager.constants";
 import { runPipeline } from "./pipeline";
 import { MessageUtil } from "./utils/message.util";
 import { FsUtil } from "./utils/fs.util";
@@ -16,7 +15,7 @@ const main = async () => {
 
   const configChoice: ConfigChoice = await collectConfig(initial);
 
-  const ormOrOdmMessage: string = await runPipeline(configChoice);
+  const stepMessages: string[] = await runPipeline(configChoice);
 
   const { packager } = configChoice;
   const startCommand = packager.run('start dev ');
@@ -29,7 +28,7 @@ const main = async () => {
 
   MessageUtil.success(`\nProject ${FsUtil.extractProjectNameFromPath(configChoice.projectName)} was successfully installed and configured.`);
   MessageUtil.info(`\n
-    ${ormOrOdmMessage}
+    ${stepMessages.join("\n")}
 
     👉  Get started with the following commands:
 

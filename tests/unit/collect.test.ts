@@ -1,12 +1,9 @@
 import assert from "assert";
 import { test, TestContext } from "node:test";
 import prompts from "prompts";
-import { ConfigChoice } from "../../src/classes/configChoice.class";
 import {
   ARCHITECTURE_TYPE,
-  DB_LANGUAGE,
-  ODM_TYPE,
-  ORM_TYPE,
+  DATABASE,
   PACKAGER_TYPE,
 } from "../../src/config/choices";
 import { collectConfig } from "../../src/config/questions";
@@ -40,38 +37,37 @@ function stubConsoleError(t: TestContext): string[] {
 //                             FULL FLOWS
 // =============================================================================
 
-test("collects a full SQL config (ORM question asked)", async () => {
+test("collects a full SQL config (prisma auto-selected for mysql)", async () => {
   prompts.inject([
     "my-app",
     PACKAGER_TYPE.NPM,
     ARCHITECTURE_TYPE.FEATURED,
-    DB_LANGUAGE.SQL,
-    ORM_TYPE.PRISMA,
+    DATABASE.MYSQL,
   ]);
 
   const config = await collectConfig();
 
-  assert.ok(config instanceof ConfigChoice);
+  assert.strictEqual(config.packager.lockfile, "package-lock.json");
   assert.strictEqual(config.projectName, "my-app");
   assert.strictEqual(config.packagerType, PACKAGER_TYPE.NPM);
   assert.strictEqual(config.architectureType, ARCHITECTURE_TYPE.FEATURED);
-  assert.strictEqual(config.dbLanguage, DB_LANGUAGE.SQL);
-  assert.strictEqual(config.ormOrOdm, ORM_TYPE.PRISMA);
+  assert.strictEqual(config.database, DATABASE.MYSQL);
+  assert.strictEqual(config.orm, "prisma");
 });
 
-test("collects a full NoSQL config (ODM question asked)", async () => {
+test("collects a full NoSQL config (mongoose auto-selected for mongodb)", async () => {
   prompts.inject([
     "my-app",
     PACKAGER_TYPE.PNPM,
     ARCHITECTURE_TYPE.CLEAN,
-    DB_LANGUAGE.NOSQL,
-    ODM_TYPE.MONGOOSE,
+    DATABASE.MONGODB,
   ]);
 
   const config = await collectConfig();
 
-  assert.strictEqual(config.dbLanguage, DB_LANGUAGE.NOSQL);
-  assert.strictEqual(config.ormOrOdm, ODM_TYPE.MONGOOSE);
+  assert.strictEqual(config.database, DATABASE.MONGODB);
+  assert.strictEqual(config.orm, "mongoose");
+  assert.strictEqual(config.packager.lockfile, "pnpm-lock.yaml");
 });
 
 
@@ -84,14 +80,14 @@ test("skips the project name question when pre-filled from argv", async () => {
   prompts.inject([
     PACKAGER_TYPE.YARN,
     ARCHITECTURE_TYPE.FEATURED,
-    DB_LANGUAGE.SQL,
-    ORM_TYPE.PRISMA,
+    DATABASE.MYSQL,
   ]);
 
   const config = await collectConfig({ projectName: "from-argv" });
 
   assert.strictEqual(config.projectName, "from-argv");
   assert.strictEqual(config.packagerType, PACKAGER_TYPE.YARN);
+  assert.strictEqual(config.orm, "prisma");
 });
 
 
@@ -139,7 +135,7 @@ test("cancellation on a later question also aborts", async (t) => {
 });
 
 // =============================================================================
-//                            CANCELLATION
+//                            VALIDATION
 // =============================================================================
 
 test("empty project name is rejected with the historical message", async (t) => {
@@ -150,8 +146,7 @@ test("empty project name is rejected with the historical message", async (t) => 
     "",
     PACKAGER_TYPE.NPM,
     ARCHITECTURE_TYPE.FEATURED,
-    DB_LANGUAGE.SQL,
-    ORM_TYPE.PRISMA,
+    DATABASE.MYSQL,
   ]);
 
   await assert.rejects(collectConfig(), (err: unknown) => {
@@ -163,5 +158,55 @@ test("empty project name is rejected with the historical message", async (t) => 
   assert.ok(
     errors.some((message) => message.includes("You must specify a name to create project.")),
     `Expected historical validation message, got: ${errors.join(" | ")}`
+  );
+});
+
+test("unknown orm pre-filled is rejected with the available list", async (t) => {
+  stubExit(t);
+  const errors = stubConsoleError(t);
+
+  await assert.rejects(
+    collectConfig({
+      projectName: "my-app",
+      packagerType: PACKAGER_TYPE.NPM,
+      architectureType: ARCHITECTURE_TYPE.FEATURED,
+      database: DATABASE.MYSQL,
+      orm: "typeorm",
+    }),
+    (err: unknown) => {
+      assert.ok(err instanceof ExitError);
+      assert.strictEqual(err.code, 1);
+      return true;
+    }
+  );
+
+  assert.ok(
+    errors.some((message) => message.includes('Unknown ORM "typeorm"') && message.includes("prisma, mongoose")),
+    `Expected unknown-orm message listing available ids, got: ${errors.join(" | ")}`
+  );
+});
+
+test("incompatible orm/database pair pre-filled is rejected with the compatible list", async (t) => {
+  stubExit(t);
+  const errors = stubConsoleError(t);
+
+  await assert.rejects(
+    collectConfig({
+      projectName: "my-app",
+      packagerType: PACKAGER_TYPE.NPM,
+      architectureType: ARCHITECTURE_TYPE.FEATURED,
+      database: DATABASE.MONGODB,
+      orm: "prisma",
+    }),
+    (err: unknown) => {
+      assert.ok(err instanceof ExitError);
+      assert.strictEqual(err.code, 1);
+      return true;
+    }
+  );
+
+  assert.ok(
+    errors.some((message) => message.includes("does not support") && message.includes("Compatible: mysql")),
+    `Expected incompatibility message listing compatible databases, got: ${errors.join(" | ")}`
   );
 });

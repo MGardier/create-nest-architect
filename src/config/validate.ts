@@ -1,12 +1,16 @@
-import { ConfigChoice } from "../classes/configChoice.class";
 import { MessageUtil } from "../utils/message.util";
-import { ODM_TYPE, ORM_TYPE } from "./choices";
-import { ConfigData, PartialConfig } from "./config.types";
+import { PackagerFactory } from "../constants/packager.constants";
+import { findOrmInstaller, ORM_INSTALLERS } from "../steps/orm/registry";
+import { DATABASE_META } from "./choices";
+import { ConfigChoice, ConfigData, PartialConfig } from "./config.types";
 
 /**
  * The validation sequence as data, mirroring questions.ts: one entry
  * per rule, checked in order. All validation happens here, before any
  * side effect. The first failing rule prints its message and exits.
+ * Compatibility rules consult the registry — the same source of truth
+ * the prompt uses, so the non-interactive path (argv, future flags,
+ * tests) enforces exactly what the prompt offers.
  */
 interface Validation {
   check: (config: PartialConfig) => boolean;
@@ -24,14 +28,17 @@ const hasPackagerType = (config: PartialConfig): boolean => !!config.packagerTyp
 
 const hasArchitectureType = (config: PartialConfig): boolean => !!config.architectureType;
 
-const hasDbLanguage = (config: PartialConfig): boolean => !!config.dbLanguage;
+const hasDatabase = (config: PartialConfig): boolean => !!config.database;
 
-const hasOrmOrOdm = (config: PartialConfig): boolean => !!config.ormOrOdm;
+const hasOrm = (config: PartialConfig): boolean => !!config.orm;
 
-const SUPPORTED_ORM_OR_ODM: string[] = [ORM_TYPE.PRISMA, ODM_TYPE.MONGOOSE];
+const isKnownOrm = (config: PartialConfig): boolean =>
+  !!findOrmInstaller(config.orm ?? "");
 
-const isSupportedOrmOrOdm = (config: PartialConfig): boolean =>
-  SUPPORTED_ORM_OR_ODM.includes(config.ormOrOdm as string);
+const isOrmCompatibleWithDatabase = (config: PartialConfig): boolean => {
+  const installer = findOrmInstaller(config.orm ?? "");
+  return !!installer && !!config.database && installer.supportedDatabases.includes(config.database);
+};
 
 
 // =============================================================================
@@ -42,9 +49,24 @@ const validations: Validation[] = [
   { check: hasProjectName, message: () => "You must specify a name to create project." },
   { check: hasPackagerType, message: () => "You must choose a package manager." },
   { check: hasArchitectureType, message: () => "You must choose an architecture." },
-  { check: hasDbLanguage, message: () => "You must choose a db language." },
-  { check: hasOrmOrOdm, message: () => "You must choose an Orm or Odm." },
-  { check: isSupportedOrmOrOdm, message: (config) => `Unsupported ORM/ODM type: ${config.ormOrOdm}` },
+  { check: hasDatabase, message: () => "You must choose a database." },
+  { check: hasOrm, message: () => "You must choose an Orm or Odm." },
+  {
+    check: isKnownOrm,
+    message: (config) =>
+      `Unknown ORM "${config.orm}". Available: ${ORM_INSTALLERS.map((installer) => installer.id).join(", ")}`,
+  },
+  {
+    check: isOrmCompatibleWithDatabase,
+    message: (config) => {
+      const installer = findOrmInstaller(config.orm ?? "")!;
+      const databaseLabel = config.database
+        ? DATABASE_META[config.database]?.label.trim() ?? config.database
+        : String(config.database);
+      return `${installer.label.trim()} does not support ${databaseLabel}. ` +
+        `Compatible: ${installer.supportedDatabases.join(", ")}`;
+    },
+  },
 ];
 
 
@@ -61,13 +83,11 @@ export const validateConfig = (partial: PartialConfig): ConfigChoice => {
   }
 
   // Every field was checked by the loop above, the partial is complete
+  // and the orm/database pair is supported by the registry
   const config = partial as ConfigData;
 
-  return new ConfigChoice(
-    config.projectName,
-    config.packagerType,
-    config.architectureType,
-    config.dbLanguage,
-    config.ormOrOdm
-  );
+  return {
+    ...config,
+    packager: PackagerFactory.getCommands(config.packagerType),
+  };
 };
