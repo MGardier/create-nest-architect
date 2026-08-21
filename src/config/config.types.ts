@@ -1,6 +1,12 @@
 import { ARCHITECTURE_TYPE, DATABASE, PACKAGER_TYPE } from "./choices";
 import { IPackagerCommands } from "../constants/packager.constants";
 
+
+
+// =============================================================================
+//                              CONFIG
+// =============================================================================
+
 /**
  * The configuration being collected: plain data, filled question by
  * question by the accumulator loop. `orm` holds an installer id from
@@ -23,3 +29,22 @@ export type PartialConfig = Partial<ConfigData>;
  * registry, and packager commands resolved once.
  */
 export type ConfigChoice = Readonly<ConfigData & { packager: IPackagerCommands }>;
+
+
+
+// =============================================================================
+//                              QUESTIONS
+// =============================================================================
+
+
+/**
+ * The collect sequence as data: one entry per user decision, asked in
+ * order. A question is skipped when its id is already filled in the
+ * accumulated config or when its `when` condition returns false.
+ */
+export interface Question {
+  id: keyof ConfigData;
+  when?: (config: PartialConfig) => boolean;
+  ask: (config: PartialConfig) => Promise<unknown>;
+}
+

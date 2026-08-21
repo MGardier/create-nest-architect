@@ -2,20 +2,22 @@
 
 import { PACKAGER_TYPE } from "./config/choices";
 import { ConfigChoice, PartialConfig } from "./config/config.types";
-import { collectConfig } from "./config/questions";
-import { runPipeline } from "./pipeline";
+
+
 import { MessageUtil } from "./utils/message.util";
 import { FsUtil } from "./utils/fs.util";
+import { executeConfig } from "./execute";
+import { collectConfig } from "./collect";
 
 
 const main = async () => {
 
-  // Reading argv is the CLI's job: pre-filled answers make the matching questions skipped
+  // Reading argv: pre-filled answers make the matching questions skipped
   const initial: PartialConfig = process.argv[2] ? { projectName: process.argv[2] } : {};
 
   const configChoice: ConfigChoice = await collectConfig(initial);
 
-  const stepMessages: string[] = await runPipeline(configChoice);
+  const stepMessages: string[] = await executeConfig(configChoice);
 
   const { packager } = configChoice;
   const startCommand = packager.run('start dev ');

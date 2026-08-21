@@ -31,7 +31,7 @@ export interface PipelineOverrides {
 }
 
 // =============================================================================
-//                              PIPELINE LOOP
+//                           ACCUMULATOR LOOP
 // =============================================================================
 
 /**
@@ -48,7 +48,7 @@ export interface PipelineOverrides {
  * Returns the "next steps" messages of the steps, for the final recap.
  * No prompt, no console.log here.
  */
-export const runPipeline = async (
+export const executeConfig = async (
   config: ConfigChoice,
   overrides: PipelineOverrides = {}
 ): Promise<string[]> => {
@@ -56,6 +56,8 @@ export const runPipeline = async (
   const messages: string[] = [];
   const tree = new VirtualTree();
 
+
+  // STEPPER ACCUMULATOR
   for (const step of overrides.steps ?? steps) {
     if (step.when && !step.when(config)) continue;
 
@@ -66,6 +68,7 @@ export const runPipeline = async (
   // Any error above means nothing was ever written to disk
   await tree.commit(resolve(process.cwd(), config.projectName));
 
+  // POST STEPPER ACCUMULATOR
   for (const step of overrides.postSteps ?? postSteps) {
     if (step.when && !step.when(config)) continue;
 
@@ -75,3 +78,5 @@ export const runPipeline = async (
 
   return messages;
 };
+
+

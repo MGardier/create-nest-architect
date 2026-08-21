@@ -19,7 +19,7 @@ interface Validation {
 
 
 // =============================================================================
-//                              CHECK METHODS
+//                              VALIDATION METHODS
 // =============================================================================
 
 const hasProjectName = (config: PartialConfig): boolean => !!config.projectName;
