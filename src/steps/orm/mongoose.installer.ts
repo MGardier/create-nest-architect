@@ -1,100 +1,69 @@
-import { resolve } from "path";
-import { promisify } from "util";
-import { exec as execCb } from "child_process";
 import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
+import { VirtualTree } from "../../services/tree.service";
 import { FsUtil } from "../../utils/fs.util";
 import { MessageUtil } from "../../utils/message.util";
-import type { OrmInstaller } from "./orm-installer.types";
+import { OrmInstaller, readTemplate, updateEnvExampleIfNeeded } from "./orm-installer.types";
 
 // =============================================================================
-//                              CLEAN METHOD 
+//                              CLEAN METHOD
 // =============================================================================
-const setUpMongooseClean = async (targetDir: string, config: ConfigChoice): Promise<void> => {
 
-    const mongooseDir = `${targetDir}/src/infrastructure/repositories/mongoose/`;
+const setUpMongooseClean = async (tree: VirtualTree): Promise<void> => {
+    const mongooseDir = "src/infrastructure/repositories/mongoose";
 
-
-    MessageUtil.info(`\nCreating Mongoose config folder in ${mongooseDir}...`);
-    await FsUtil.createDirectory(mongooseDir);
-
-    MessageUtil.info(`\nGenerating mongoose module...`);
-    const mongooseModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.MONGOOSE_MODULE}`));
-    await FsUtil.createFile(`${mongooseDir}/mongoose.module.ts`, mongooseModuleContent);
-
+    MessageUtil.info(`\nGenerating mongoose module in ${mongooseDir}...`);
+    tree.write(`${mongooseDir}/mongoose.module.ts`, await readTemplate(TEMPLATE_PATH.mongoose.module));
 
     MessageUtil.info(`\nGenerating mongoose example entity...`);
-    await FsUtil.createDirectory(`${mongooseDir}/schemas`);
-    const mongooseEntityContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.MONGOOSE_ENTITY}`));
-    await FsUtil.createFile(`${mongooseDir}/schemas/product.entity.ts`, mongooseEntityContent);
+    tree.write(`${mongooseDir}/schemas/product.entity.ts`, await readTemplate(TEMPLATE_PATH.mongoose.entity));
 
     MessageUtil.info(`\nUpdating app module...`);
-    const appModulePath = `${targetDir}/src/app.module.ts`;
-    let appModuleContent = await FsUtil.getFileContent(appModulePath);
-    appModuleContent =  FsUtil.addNewModuleClean(
-        appModuleContent,
+    const appModuleContent = FsUtil.addNewModuleClean(
+        tree.read("src/app.module.ts"),
         `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
         `MongooseModule`
     );
-    await FsUtil.createFile(appModulePath, appModuleContent);
+    tree.write("src/app.module.ts", appModuleContent);
 
     MessageUtil.success(`MongooseModule correctly imported and AppModule correctly updated.`);
-
-    FsUtil.updateEnvExampleIfNeeded(config.projectName, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
 };
 
 // =============================================================================
 //                              FEATURED  METHOD
 // =============================================================================
-const setUpMongooseFeatured = async (targetDir: string, config: ConfigChoice): Promise<void> => {
 
+const setUpMongooseFeatured = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+    const productDir = "src/product";
 
-    const mongooseDir = `${targetDir}/src/product/`;
-    const appModulePath: string = `${targetDir}/src/app.module.ts`;
-    const productModulePath: string = `${targetDir}/src/product/product.module.ts`;
-
-
-    MessageUtil.info(`\nGenerating mongoose example  entity in ${mongooseDir}...`);
-    const mongooseEntityContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.MONGOOSE_ENTITY}`));
-    await FsUtil.createFile(`${mongooseDir}/entities/product.entity.ts`, mongooseEntityContent);
-
+    MessageUtil.info(`\nGenerating mongoose example  entity in ${productDir}...`);
+    tree.write(`${productDir}/entities/product.entity.ts`, await readTemplate(TEMPLATE_PATH.mongoose.entity));
 
     MessageUtil.info(`\nUpdating example entity module...`);
-    const currentProductModuleContent: string = await FsUtil.getFileContent(resolve(process.cwd(), productModulePath));
     const newMongooseModuleForProductModule = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
     const newImportsForProductModule = `
         import { MongooseModule } from '@nestjs/mongoose';
         import { Product, ProductSchema } from './entities/product.entity';
     `
-    const newProductModuleContent = FsUtil.addNewModuleFeatured(currentProductModuleContent, newImportsForProductModule, newMongooseModuleForProductModule)
-    await FsUtil.createFile(productModulePath, newProductModuleContent);
+    const newProductModuleContent = FsUtil.addNewModuleFeatured(
+        tree.read(`${productDir}/product.module.ts`),
+        newImportsForProductModule,
+        newMongooseModuleForProductModule
+    );
+    tree.write(`${productDir}/product.module.ts`, newProductModuleContent);
 
     MessageUtil.info(`\nUpdating app.module...`);
-    const currentAppModuleContent: string = await FsUtil.getFileContent(appModulePath);
     const dbUrl: string = `'${DATABASE_META[config.database].envUrlExample}'`;
-
     const mongooseImportModule: string = `MongooseModule.forRoot(process.env.DATABASE_URL || ${dbUrl})`;
-    const newAppModuleContent = FsUtil.addNewModuleFeatured(currentAppModuleContent, "import { MongooseModule } from '@nestjs/mongoose'", mongooseImportModule);
-    await FsUtil.createFile(appModulePath, newAppModuleContent);
+    const newAppModuleContent = FsUtil.addNewModuleFeatured(
+        tree.read("src/app.module.ts"),
+        "import { MongooseModule } from '@nestjs/mongoose'",
+        mongooseImportModule
+    );
+    tree.write("src/app.module.ts", newAppModuleContent);
+
     MessageUtil.success(`Mongoose module correctly generating and app module correctly updated.`);
-
-    FsUtil.updateEnvExampleIfNeeded(config.projectName, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
-};
-
-// =============================================================================
-//                              INSTALL METHOD
-// =============================================================================
-
-const installMongoose = async (targetDir: string, config: ConfigChoice): Promise<void> => {
-    const exec = promisify(execCb);
-    const { packager } = config;
-
-    await exec(packager.add('@nestjs/mongoose mongoose'), {
-        cwd: targetDir,
-        shell: "/bin/bash"
-    });
-    MessageUtil.success('Mongoose successfully installed');
 };
 
 // =============================================================================
@@ -105,17 +74,19 @@ export const mongooseInstaller: OrmInstaller = {
     id: "mongoose",
     label: "📦   Mongoose",
     supportedDatabases: [DATABASE.MONGODB],
+    dependencies: ["@nestjs/mongoose", "mongoose"],
 
-    async run(config: ConfigChoice): Promise<string> {
+    async run(tree: VirtualTree, config: ConfigChoice): Promise<string> {
         MessageUtil.info('\nInstalling Mongoose...');
-        const targetDir = resolve(process.cwd(), config.projectName);
-        await installMongoose(targetDir, config);
+
         if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) {
-            await setUpMongooseClean(targetDir, config);
+            await setUpMongooseClean(tree);
         }
         else {
-            await setUpMongooseFeatured(targetDir, config);
+            await setUpMongooseFeatured(tree, config);
         }
+
+        updateEnvExampleIfNeeded(tree, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
 
         return `
     👉 Before starting dont forget to :

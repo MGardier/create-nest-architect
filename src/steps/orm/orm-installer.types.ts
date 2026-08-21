@@ -1,5 +1,9 @@
+import { promises as fs } from "fs";
+import { resolve } from "path";
 import type { DATABASE } from "../../config/choices";
 import type { ConfigChoice } from "../../config/config.types";
+import type { VirtualTree } from "../../services/tree.service";
+import { MessageUtil } from "../../utils/message.util";
 
 /**
  * An installer declares who it is (metadata, consulted by the prompt
@@ -19,7 +23,26 @@ export interface OrmInstaller {
   /** THE compatibility matrix, one line per installer */
   supportedDatabases: DATABASE[];
 
-  /** Returns its "next steps" instructions for the final recap.
-   *  (The VirtualTree slips into this signature at PR 4.) */
-  run: (config: ConfigChoice) => Promise<string>;
+  /** Packages installed by the post-commit install step */
+  dependencies: string[];
+
+  /** Writes its files into the tree and returns its "next steps"
+   *  instructions for the final recap. No disk access. */
+  run: (tree: VirtualTree, config: ConfigChoice) => Promise<string>;
 }
+
+/** Reads one of the CLI's own template assets (dist/templates at runtime). */
+export const readTemplate = (relativePath: string): Promise<string> =>
+  fs.readFile(resolve(__dirname, `../../templates/${relativePath}`), "utf-8");
+
+/** Appends KEY="value" to the tree's .env.example unless already present. */
+export const updateEnvExampleIfNeeded = (tree: VirtualTree, key: string, value: string): void => {
+  MessageUtil.info(`\nAdding  ${key} to .env.example...`);
+  const current = tree.exists(".env.example") ? tree.read(".env.example") : "";
+  if (current.includes(`${key}=`)) {
+    MessageUtil.info(`${key} already exists in .env.example`);
+    return;
+  }
+  tree.write(".env.example", `${current}\n${key}="${value}"\n`);
+  MessageUtil.success(`.env.example correctly updated with ${key}`);
+};

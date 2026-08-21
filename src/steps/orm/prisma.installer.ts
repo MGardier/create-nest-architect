@@ -1,12 +1,10 @@
-import { join, resolve } from "path";
-import { promisify } from "util";
-import { exec as execCb } from "child_process";
 import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
+import { VirtualTree } from "../../services/tree.service";
 import { FsUtil } from "../../utils/fs.util";
 import { MessageUtil } from "../../utils/message.util";
-import type { OrmInstaller } from "./orm-installer.types";
+import { OrmInstaller, readTemplate, updateEnvExampleIfNeeded } from "./orm-installer.types";
 
 // =============================================================================
 //                              PRISMA PROVIDERS
@@ -22,115 +20,77 @@ const PRISMA_PROVIDERS: Partial<Record<DATABASE, string>> = {
 };
 
 // =============================================================================
+//                              SCHEMA
+// =============================================================================
+
+const writeSchema = async (tree: VirtualTree, config: ConfigChoice, schemaPath: string): Promise<void> => {
+  MessageUtil.info(`\nGenerating ${schemaPath}...`);
+  // supportedDatabases only lists databases present in PRISMA_PROVIDERS
+  const provider = PRISMA_PROVIDERS[config.database]!;
+  const schemaContent = (await readTemplate(TEMPLATE_PATH.prisma.schema)).replace("__PROVIDER__", provider);
+  tree.write(schemaPath, schemaContent);
+};
+
+// =============================================================================
 //                              CLEAN METHOD
 // =============================================================================
 
-const setUpPrismaClean = async (targetDir: string, config: ConfigChoice): Promise<void> => {
-  const exec = promisify(execCb);
-  MessageUtil.info('\nMoving Prisma...');
-  await exec(`mkdir -p src/infrastructure/repositories/prisma/.config && mv prisma/* src/infrastructure/repositories/prisma/.config && rmdir prisma`, {
-    cwd: targetDir,
-    shell: "/bin/bash"
-  });
-  MessageUtil.success(`Prisma moved in src/infrastructure/repositories/prisma/.config`);
+const setUpPrismaClean = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+  const prismaDir = "src/infrastructure/repositories/prisma/.config";
 
-
-  const prismaDir = join(targetDir, '/src/infrastructure/repositories/prisma/.config');
+  await writeSchema(tree, config, `${prismaDir}/schema.prisma`);
 
   MessageUtil.info(`\nGenerating prisma.module in ${prismaDir}...`);
-  const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
-  await FsUtil.createFile(`${prismaDir}/prisma.module.ts`, prismaModuleContent);
+  tree.write(`${prismaDir}/prisma.module.ts`, await readTemplate(TEMPLATE_PATH.prisma.module));
 
   MessageUtil.info(`\nGenerating prisma.service in ${prismaDir}...`);
-  const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
-  await FsUtil.createFile(`${prismaDir}/prisma.service.ts`, prismaServiceContent);
+  tree.write(`${prismaDir}/prisma.service.ts`, await readTemplate(TEMPLATE_PATH.prisma.service));
 
   MessageUtil.info(`\nUpdating app.module...`);
-  const appModulePath = join(targetDir, '/src/app.module.ts');
-  let appModuleContent = await FsUtil.getFileContent(appModulePath);
-
-  appModuleContent =  FsUtil.addNewModuleClean(
-    appModuleContent,
+  const appModuleContent = FsUtil.addNewModuleClean(
+    tree.read("src/app.module.ts"),
     `import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module'`,
     `PrismaModule`
   );
-  await FsUtil.createFile(appModulePath, appModuleContent);
+  tree.write("src/app.module.ts", appModuleContent);
 
-  MessageUtil.info(`\nUpdating prisma.config...`);
-  const prismaConfigPath = join(targetDir, '/prisma.config.ts');
-  let prismaConfigContent = await FsUtil.getFileContent(prismaConfigPath);
-
-  prismaConfigContent =  FsUtil.addOptionInPrismaConfig(prismaConfigContent, "  schema: 'src/infrastructure/repositories/prisma/.config/schema.prisma'")
-  await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
+  MessageUtil.info(`\nGenerating prisma.config...`);
+  const prismaConfigContent = FsUtil.addOptionInPrismaConfig(
+    await readTemplate(TEMPLATE_PATH.prisma.config),
+    `  schema: '${prismaDir}/schema.prisma'`
+  );
+  tree.write("prisma.config.ts", prismaConfigContent);
 
   MessageUtil.success(`\nPrisma module correctly generating and AppModule  correctly updated.`);
-
-
-  FsUtil.updateEnvExampleIfNeeded(config.projectName, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
 };
 
 // =============================================================================
 //                              FEATURED  METHOD
 // =============================================================================
 
+const setUpPrismaFeatured = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+  const prismaDir = "prisma";
 
-const setUpPrismaFeatured = async (targetDir: string, config: ConfigChoice): Promise<void> => {
-
-  const prismaDir = `${targetDir}/prisma`;
-  const appModulePath = `${targetDir}/src/app.module.ts`;
-  const prismaModulePath = `${prismaDir}/prisma.module.ts`;
-  const prismaServicePath = `${prismaDir}/prisma.service.ts`;
+  await writeSchema(tree, config, `${prismaDir}/schema.prisma`);
 
   MessageUtil.info(`\nGenerating prisma.module in ${prismaDir}...`);
-  const prismaModuleContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.PRISMA_MODULE}`));
-  await FsUtil.createFile(prismaModulePath, prismaModuleContent);
+  tree.write(`${prismaDir}/prisma.module.ts`, await readTemplate(TEMPLATE_PATH.prisma.module));
 
   MessageUtil.info(`\nGenerating prisma.service in ${prismaDir}...`);
-  const prismaServiceContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.PRISMA_SERVICE}`));
-  await FsUtil.createFile(prismaServicePath, prismaServiceContent);
+  tree.write(`${prismaDir}/prisma.service.ts`, await readTemplate(TEMPLATE_PATH.prisma.service));
 
   MessageUtil.info(`\nUpdating app.module...`);
-  let appModuleContent = await FsUtil.getFileContent(appModulePath);
-  appModuleContent = FsUtil.addNewModuleFeatured(appModuleContent, "import { PrismaModule } from 'prisma/prisma.module'", "PrismaModule")
-  await FsUtil.createFile(appModulePath, appModuleContent);
-
-  MessageUtil.success(`\nPrisma folder correctly generating and AppModule  correctly updated.`);
-
-  FsUtil.updateEnvExampleIfNeeded(config.projectName, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
-};
-
-// =============================================================================
-//                              INSTALL  METHOD
-// =============================================================================
-
-const installPrisma = async (targetDir: string, config: ConfigChoice): Promise<void> => {
-
-  const exec = promisify(execCb);
-  const { packager } = config;
-
-  await exec(`${packager.add('prisma @prisma/client')} && ${packager.exec('prisma init')}`, {
-    cwd: targetDir,
-    shell: "/bin/bash"
-  });
-  MessageUtil.success('Prisma successfully installed');
-
-  const prismaSchemaPath = `${targetDir}/prisma/schema.prisma`;
-  let prismaSchemaContent = await FsUtil.getFileContent(prismaSchemaPath);
-  prismaSchemaContent = prismaSchemaContent.replace(/^\s*output\s*=.*$/gm, '');
-
-  // supportedDatabases only lists databases present in PRISMA_PROVIDERS
-  const provider = PRISMA_PROVIDERS[config.database]!;
-  prismaSchemaContent = prismaSchemaContent.replace(
-    /(datasource\s+\w+\s*{[^}]*provider\s*=\s*)"[^"]*"/,
-    `$1"${provider}"`
+  const appModuleContent = FsUtil.addNewModuleFeatured(
+    tree.read("src/app.module.ts"),
+    "import { PrismaModule } from 'prisma/prisma.module'",
+    "PrismaModule"
   );
-  await FsUtil.createFile(prismaSchemaPath, prismaSchemaContent);
-
+  tree.write("src/app.module.ts", appModuleContent);
 
   MessageUtil.info(`\nGenerating prisma.config...`);
-  let prismaConfigContent = await FsUtil.getFileContent(resolve(__dirname, `../../templates/${TEMPLATE_PATH.PRISMA_CONFIG}`));
+  tree.write("prisma.config.ts", await readTemplate(TEMPLATE_PATH.prisma.config));
 
-  await FsUtil.createFile(`${targetDir}/prisma.config.ts`, prismaConfigContent);
+  MessageUtil.success(`\nPrisma folder correctly generating and AppModule  correctly updated.`);
 };
 
 // =============================================================================
@@ -141,19 +101,19 @@ export const prismaInstaller: OrmInstaller = {
   id: "prisma",
   label: "📦   Prisma",
   supportedDatabases: [DATABASE.MYSQL],
+  dependencies: ["prisma", "@prisma/client"],
 
-  async run(config: ConfigChoice): Promise<string> {
+  async run(tree: VirtualTree, config: ConfigChoice): Promise<string> {
     MessageUtil.info('\nInstalling Prisma...');
-    const targetDir = resolve(process.cwd(), config.projectName);
-
-    await installPrisma(targetDir, config);
 
     if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) {
-      await setUpPrismaClean(targetDir, config);
+      await setUpPrismaClean(tree, config);
     }
     else {
-      await setUpPrismaFeatured(targetDir, config);
+      await setUpPrismaFeatured(tree, config);
     }
+
+    updateEnvExampleIfNeeded(tree, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
 
     return `
     👉 Before starting don't forget to :
