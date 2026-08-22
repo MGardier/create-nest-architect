@@ -1,5 +1,11 @@
-import { ConfigChoice,  PartialConfig, Question } from "./config/config.types";
-import { askArchitecture, askDatabase, askOrm, askPackager, askProjectName } from "./config/questions";
+import { ConfigChoice, ConfigData, PartialConfig, Question } from "./config/config.types";
+import {
+  askArchitecture,
+  askDatabase,
+  askOrm,
+  askPackager,
+  askProjectName,
+} from "./config/questions";
 import { validateConfig } from "./config/validate";
 import { MessageUtil } from "./utils/message.util";
 
@@ -22,6 +28,19 @@ const questions: Readonly<Question[]> = [
 //                        ACCUMULATOR LOOP
 // =============================================================================
 
+/**
+ * The only cast of the collect flow, and it is safe by construction: the
+ * Question union already guarantees that each ask returns the type of
+ * its own field.
+ */
+const setAnswer = (
+  config: PartialConfig,
+  key: keyof ConfigData,
+  answer: ConfigData[keyof ConfigData]
+): void => {
+  config[key] = answer as never;
+};
+
 export const collectConfig = async (
   initialConfig: PartialConfig = {}
 ): Promise<ConfigChoice> => {
@@ -42,7 +61,7 @@ export const collectConfig = async (
       process.exit(1);
     }
 
-    config[question.id] = answer as never;
+    setAnswer(config, question.id, answer);
   }
 
   return validateConfig(config);

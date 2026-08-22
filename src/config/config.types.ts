@@ -9,9 +9,7 @@ import { IPackagerCommands } from "../constants/packager.constants";
 
 /**
  * The configuration being collected: plain data, filled question by
- * question by the accumulator loop. `orm` holds an installer id from
- * the registry (steps/orm/registry.ts) — the registry, not the type
- * system, is the source of truth for orm/database compatibility.
+ * question by the accumulator loop.
  */
 export interface ConfigData {
   projectName: string;
@@ -21,12 +19,13 @@ export interface ConfigData {
   orm: string;
 }
 
+/**
+ * The starting configuration.
+ */
 export type PartialConfig = Partial<ConfigData>;
 
 /**
- * The validated configuration handed to the pipeline. Built once by
- * validateConfig(): orm/database compatibility checked against the
- * registry, and packager commands resolved once.
+ * The validated configuration.
  */
 export type ConfigChoice = Readonly<ConfigData & { packager: IPackagerCommands }>;
 
@@ -37,14 +36,19 @@ export type ConfigChoice = Readonly<ConfigData & { packager: IPackagerCommands }
 // =============================================================================
 
 
-/**
- * The collect sequence as data: one entry per user decision, asked in
- * order. A question is skipped when its id is already filled in the
- * accumulated config or when its `when` condition returns false.
- */
-export interface Question {
-  id: keyof ConfigData;
+type ConfigField = keyof ConfigData;
+
+type AnswerFor<Field extends ConfigField> = ConfigData[Field] | undefined;
+
+type QuestionFilling<Field extends ConfigField> = {
+  id: Field;
   when?: (config: PartialConfig) => boolean;
-  ask: (config: PartialConfig) => Promise<unknown>;
-}
+  ask: (config: PartialConfig) => Promise<AnswerFor<Field>>;
+};
+
+type QuestionByField = {
+  [Field in ConfigField]: QuestionFilling<Field>;
+};
+
+export type Question = QuestionByField[ConfigField];
 
