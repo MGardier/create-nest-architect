@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import { ConfigChoice } from "./config/config.types";
-import { VirtualTree } from "./services/tree.service";
+import { VirtualTreeService } from "./services/virtual-tree.service";
 import { finalizeStep } from "./steps/finalize.step";
 import { loadTemplateStep } from "./steps/load-template.step";
 import { ormStep } from "./steps/orm.step";
@@ -8,10 +8,7 @@ import { installStep } from "./steps/post/install.step";
 import type { PostStep, Step } from "./steps/step.types";
 
 /**
- * The execution sequence as data (mirror of questions[] in questions.ts).
- * Adding / reordering / conditioning a step = editing these arrays.
- *
- * - steps[]     : write into the in-memory tree — nothing on disk.
+ * - steps[]     : run on virtual tree — nothing on disk.
  * - postSteps[] : run on the real project directory, after the commit.
  */
 const steps: Step[] = [
@@ -24,8 +21,7 @@ const postSteps: PostStep[] = [
   installStep,
 ];
 
-/** Test seam: lets unit tests run the loops with fake steps. */
-export interface PipelineOverrides {
+export interface ExecutionPipeline {
   steps?: Step[];
   postSteps?: PostStep[];
 }
@@ -50,11 +46,11 @@ export interface PipelineOverrides {
  */
 export const executeConfig = async (
   config: ConfigChoice,
-  overrides: PipelineOverrides = {}
+  overrides: ExecutionPipeline = {}
 ): Promise<string[]> => {
 
   const messages: string[] = [];
-  const tree = new VirtualTree();
+  const tree = new VirtualTreeService();
 
 
   // STEPPER ACCUMULATOR

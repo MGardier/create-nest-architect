@@ -2,7 +2,7 @@ import { existsSync, promises as fs } from "fs";
 import { dirname, join, relative, resolve } from "path";
 import { StringUtil } from "../utils/string.util";
 
-/** File / directory names never loaded into the tree. */
+/** File & directory names never loaded into the tree. */
 const EXCLUDED_ENTRIES = [".git"];
 
 /**
@@ -16,7 +16,7 @@ const EXCLUDED_ENTRIES = [".git"];
  * - Keys are project-relative paths, "/" separated
  *   (e.g. "src/app.module.ts").
  */
-export class VirtualTree {
+export class VirtualTreeService {
   private readonly files = new Map<string, string>();
 
   // =============================================================================
