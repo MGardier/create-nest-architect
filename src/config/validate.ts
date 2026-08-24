@@ -2,20 +2,7 @@ import { MessageUtil } from "../utils/message.util";
 import { PackagerFactory } from "../constants/packager.constants";
 import { findOrmInstaller, ORM_INSTALLERS } from "../steps/orm/registry";
 import { DATABASE_META } from "./choices";
-import { ConfigChoice, ConfigData, PartialConfig } from "./config.types";
-
-/**
- * The validation sequence as data, mirroring questions.ts: one entry
- * per rule, checked in order. All validation happens here, before any
- * side effect. The first failing rule prints its message and exits.
- * Compatibility rules consult the registry — the same source of truth
- * the prompt uses, so the non-interactive path (argv, future flags,
- * tests) enforces exactly what the prompt offers.
- */
-interface Validation {
-  check: (config: PartialConfig) => boolean;
-  message: (config: PartialConfig) => string;
-}
+import { ConfigChoice, ConfigData, PartialConfig, Validation } from "./config.types";
 
 
 // =============================================================================

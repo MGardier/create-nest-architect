@@ -30,6 +30,18 @@ export type PartialConfig = Partial<ConfigData>;
 export type ConfigChoice = Readonly<ConfigData & { packager: IPackagerCommands }>;
 
 
+// =============================================================================
+//                              VALIDATIONS
+// =============================================================================
+
+
+export interface Validation {
+  check: (config: PartialConfig) => boolean;
+  message: (config: PartialConfig) => string;
+}
+
+
+
 
 // =============================================================================
 //                              QUESTIONS
@@ -51,4 +63,6 @@ type QuestionByField = {
 };
 
 export type Question = QuestionByField[ConfigField];
+
+
 
