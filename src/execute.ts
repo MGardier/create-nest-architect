@@ -3,7 +3,7 @@ import { ConfigChoice } from "./config/config.types";
 import { VirtualTreeService } from "./services/virtual-tree.service";
 import { finalizeStep } from "./steps/finalize.step";
 import { loadTemplateStep } from "./steps/load-template.step";
-import { ormStep } from "./steps/orm.step";
+import { setupOrm } from "./steps/orm.step";
 import { installStep } from "./steps/post/install.step";
 import type { PostStep, Step } from "./steps/step.types";
 
@@ -13,7 +13,7 @@ import type { PostStep, Step } from "./steps/step.types";
  */
 const STEPS: Step[] = [
   loadTemplateStep,
-  ormStep,
+  setupOrm,
   finalizeStep,
 ];
 

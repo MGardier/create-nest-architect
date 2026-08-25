@@ -46,7 +46,7 @@ export const askDatabase = async (): Promise<DATABASE | undefined> => {
 };
 
 export const askOrm = async (config: PartialConfig): Promise<string | undefined> => {
-  // The registry is the source of truth: only compatible installers are offered
+  // The registry is the source of truth: only compatible ORM are offered
   const compatible = ormsForDatabase(config.database!);
 
   if (compatible.length === 1) {
@@ -56,7 +56,7 @@ export const askOrm = async (config: PartialConfig): Promise<string | undefined>
 
   return PromptService.askUserWithChoices(
     "Which ORM/ODM would you like to set up?",
-    compatible.map((installer) => ({ title: installer.label, value: installer.id })),
+    compatible.map((meta) => ({ title: meta.label, value: meta.id })),
     "select"
   );
 };

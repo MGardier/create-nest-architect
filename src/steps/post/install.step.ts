@@ -1,7 +1,7 @@
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
 import { resolve } from "path";
-import { findOrmInstaller } from "../orm/registry";
+import { findOrmMeta } from "../orm/registry";
 import { MessageUtil } from "../../utils/message.util";
 import type { PostStep } from "../step.types";
 
@@ -18,8 +18,7 @@ export const installStep: PostStep = {
     const targetDir = resolve(process.cwd(), configChoice.projectName);
     const { packager } = configChoice;
 
-    // validate already guaranteed the installer exists
-    const dependencies = findOrmInstaller(configChoice.orm)!.dependencies;
+    const dependencies = findOrmMeta(configChoice.orm)!.dependencies;
     const command = dependencies.length
       ? packager.add(dependencies.join(" "))
       : packager.install;

@@ -6,29 +6,42 @@ import type { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
 
 /**
- * An installer declares who it is (metadata, consulted by the prompt
- * and the validation) and what it does (run). Compatibility is a
- * property of the installer: it knows what it supports.
+ * What an ORM *is*: metadata only, consulted by the prompt, the
+ * validation and the post-commit install. What an ORM *does* lives in
+ * its actions — the two are deliberately kept apart.
  *
- * The database is not an installer, it is a parameter: run() picks
- * what varies from DATABASE_META[config.database].
+ * Compatibility is a property of the ORM: it knows what it supports.
+ * The database is not an ORM, it is a parameter: the setup picks what
+ * varies from DATABASE_META[config.database].
  */
-export interface OrmInstaller {
+export interface OrmMeta {
   /** 'prisma' | 'mongoose' — becomes the prompt value */
   id: string;
 
   /** Prompt display */
   label: string;
 
-  /** THE compatibility matrix, one line per installer */
+  /** THE compatibility matrix, one line per ORM */
   supportedDatabases: DATABASE[];
 
   /** Packages installed by the post-commit install step */
   dependencies: string[];
+}
 
-  /** Writes its files into the tree and returns its "next steps"
-   *  instructions for the final recap. No disk access. */
-  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string>;
+/**
+ * What an ORM *does*, as data — mirroring Step in step.types.ts: one
+ * entry per file written, run in order by the accumulator loop of
+ * orm.step.ts. An action is skipped when its `when` returns false, and
+ * may return a string: its "next steps" instructions, concatenated
+ * into the step's recap.
+ *
+ * Actions only write into the tree — the pipeline commits it to disk
+ * once, after the last step.
+ */
+export interface OrmAction {
+  name: string;
+  when?: (config: ConfigChoice) => boolean;
+  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string | void>;
 }
 
 /** Reads one of the CLI's own template assets (dist/templates at runtime). */

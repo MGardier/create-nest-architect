@@ -1,6 +1,6 @@
 import { MessageUtil } from "../utils/message.util";
 import { PackagerFactory } from "../constants/packager.constants";
-import { findOrmInstaller, ORM_INSTALLERS } from "../steps/orm/registry";
+import { findOrmMeta, ORM_META } from "../steps/orm/registry";
 import { DATABASE_META } from "./choices";
 import { ConfigChoice, ConfigData, PartialConfig, Validation } from "./config.types";
 
@@ -20,11 +20,11 @@ const hasDatabase = (config: PartialConfig): boolean => !!config.database;
 const hasOrm = (config: PartialConfig): boolean => !!config.orm;
 
 const isKnownOrm = (config: PartialConfig): boolean =>
-  !!findOrmInstaller(config.orm ?? "");
+  !!findOrmMeta(config.orm ?? "");
 
 const isOrmCompatibleWithDatabase = (config: PartialConfig): boolean => {
-  const installer = findOrmInstaller(config.orm ?? "");
-  return !!installer && !!config.database && installer.supportedDatabases.includes(config.database);
+  const meta = findOrmMeta(config.orm ?? "");
+  return !!meta && !!config.database && meta.supportedDatabases.includes(config.database);
 };
 
 
@@ -41,17 +41,17 @@ const validations: Validation[] = [
   {
     check: isKnownOrm,
     message: (config) =>
-      `Unknown ORM "${config.orm}". Available: ${ORM_INSTALLERS.map((installer) => installer.id).join(", ")}`,
+      `Unknown ORM "${config.orm}". Available: ${ORM_META.map((meta) => meta.id).join(", ")}`,
   },
   {
     check: isOrmCompatibleWithDatabase,
     message: (config) => {
-      const installer = findOrmInstaller(config.orm ?? "")!;
+      const meta = findOrmMeta(config.orm ?? "")!;
       const databaseLabel = config.database
         ? DATABASE_META[config.database]?.label.trim() ?? config.database
         : String(config.database);
-      return `${installer.label.trim()} does not support ${databaseLabel}. ` +
-        `Compatible: ${installer.supportedDatabases.join(", ")}`;
+      return `${meta.label.trim()} does not support ${databaseLabel}. ` +
+        `Compatible: ${meta.supportedDatabases.join(", ")}`;
     },
   },
 ];
