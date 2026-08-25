@@ -8,9 +8,13 @@ import { MessageUtil } from "./utils/message.util";
 import { FsUtil } from "./utils/fs.util";
 import { executeConfig } from "./execute";
 import { collectConfig } from "./collect";
+import { validateRequirements } from "./requirements";
 
 
 const main = async () => {
+
+  // Nothing is asked and nothing is written until the environment is usable
+  await validateRequirements();
 
   // Reading argv: pre-filled answers make the matching questions skipped
   const initial: PartialConfig = process.argv[2] ? { projectName: process.argv[2] } : {};
