@@ -22,9 +22,7 @@ interface Version {
 //                           SUPPORTED NODE VERSION
 // =============================================================================
 
-/** The oldest Node this CLI and the generated projects run on. */
 export const MINIMUM_NODE_VERSION = "24.0";
-
 
 // =============================================================================
 //                              VERSION MATCHING
