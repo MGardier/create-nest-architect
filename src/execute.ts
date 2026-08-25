@@ -11,13 +11,13 @@ import type { PostStep, Step } from "./steps/step.types";
  * - steps[]     : run on virtual tree — nothing on disk.
  * - postSteps[] : run on the real project directory, after the commit.
  */
-const steps: Step[] = [
+const STEPS: Step[] = [
   loadTemplateStep,
   ormStep,
   finalizeStep,
 ];
 
-const postSteps: PostStep[] = [
+const POST_STEPS: PostStep[] = [
   installStep,
 ];
 
@@ -54,7 +54,7 @@ export const executeConfig = async (
 
 
   // STEPPER ACCUMULATOR
-  for (const step of overrides.steps ?? steps) {
+  for (const step of overrides.steps ?? STEPS) {
     if (step.when && !step.when(config)) continue;
 
     const message = await step.run(tree, config);
@@ -65,7 +65,7 @@ export const executeConfig = async (
   await tree.commit(resolve(process.cwd(), config.projectName));
 
   // POST STEPPER ACCUMULATOR
-  for (const step of overrides.postSteps ?? postSteps) {
+  for (const step of overrides.postSteps ?? POST_STEPS) {
     if (step.when && !step.when(config)) continue;
 
     const message = await step.run(config);

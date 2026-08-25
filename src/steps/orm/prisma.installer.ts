@@ -1,7 +1,7 @@
 import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
-import { VirtualTree } from "../../services/tree.service";
+import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { FsUtil } from "../../utils/fs.util";
 import { MessageUtil } from "../../utils/message.util";
 import { OrmInstaller, readTemplate, updateEnvExampleIfNeeded } from "./orm-installer.types";
@@ -23,7 +23,7 @@ const PRISMA_PROVIDERS: Partial<Record<DATABASE, string>> = {
 //                              SCHEMA
 // =============================================================================
 
-const writeSchema = async (tree: VirtualTree, config: ConfigChoice, schemaPath: string): Promise<void> => {
+const writeSchema = async (tree: VirtualTreeService, config: ConfigChoice, schemaPath: string): Promise<void> => {
   MessageUtil.info(`\nGenerating ${schemaPath}...`);
   // supportedDatabases only lists databases present in PRISMA_PROVIDERS
   const provider = PRISMA_PROVIDERS[config.database]!;
@@ -35,7 +35,7 @@ const writeSchema = async (tree: VirtualTree, config: ConfigChoice, schemaPath: 
 //                              CLEAN METHOD
 // =============================================================================
 
-const setUpPrismaClean = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+const setUpPrismaClean = async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
   const prismaDir = "src/infrastructure/repositories/prisma/.config";
 
   await writeSchema(tree, config, `${prismaDir}/schema.prisma`);
@@ -68,7 +68,7 @@ const setUpPrismaClean = async (tree: VirtualTree, config: ConfigChoice): Promis
 //                              FEATURED  METHOD
 // =============================================================================
 
-const setUpPrismaFeatured = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+const setUpPrismaFeatured = async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
   const prismaDir = "prisma";
 
   await writeSchema(tree, config, `${prismaDir}/schema.prisma`);
@@ -103,7 +103,7 @@ export const prismaInstaller: OrmInstaller = {
   supportedDatabases: [DATABASE.MYSQL],
   dependencies: ["prisma", "@prisma/client"],
 
-  async run(tree: VirtualTree, config: ConfigChoice): Promise<string> {
+  async run(tree: VirtualTreeService, config: ConfigChoice): Promise<string> {
     MessageUtil.info('\nInstalling Prisma...');
 
     if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) {

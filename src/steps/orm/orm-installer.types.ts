@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import { resolve } from "path";
 import type { DATABASE } from "../../config/choices";
 import type { ConfigChoice } from "../../config/config.types";
-import type { VirtualTree } from "../../services/tree.service";
+import type { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
 
 /**
@@ -28,7 +28,7 @@ export interface OrmInstaller {
 
   /** Writes its files into the tree and returns its "next steps"
    *  instructions for the final recap. No disk access. */
-  run: (tree: VirtualTree, config: ConfigChoice) => Promise<string>;
+  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string>;
 }
 
 /** Reads one of the CLI's own template assets (dist/templates at runtime). */
@@ -36,7 +36,7 @@ export const readTemplate = (relativePath: string): Promise<string> =>
   fs.readFile(resolve(__dirname, `../../templates/${relativePath}`), "utf-8");
 
 /** Appends KEY="value" to the tree's .env.example unless already present. */
-export const updateEnvExampleIfNeeded = (tree: VirtualTree, key: string, value: string): void => {
+export const updateEnvExampleIfNeeded = (tree: VirtualTreeService, key: string, value: string): void => {
   MessageUtil.info(`\nAdding  ${key} to .env.example...`);
   const current = tree.exists(".env.example") ? tree.read(".env.example") : "";
   if (current.includes(`${key}=`)) {

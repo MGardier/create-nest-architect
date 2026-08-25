@@ -1,5 +1,5 @@
 import type { ConfigChoice } from "../config/config.types";
-import type { VirtualTree } from "../services/tree.service";
+import type { VirtualTreeService } from "../services/virtual-tree.service";
 
 
 /**
@@ -14,7 +14,7 @@ import type { VirtualTree } from "../services/tree.service";
 export interface Step {
   name: string;
   when?: (config: ConfigChoice) => boolean;
-  run: (tree: VirtualTree, config: ConfigChoice) => Promise<string | void>;
+  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string | void>;
 }
 
 /**

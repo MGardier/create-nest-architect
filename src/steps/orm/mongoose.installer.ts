@@ -1,7 +1,7 @@
 import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
-import { VirtualTree } from "../../services/tree.service";
+import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { FsUtil } from "../../utils/fs.util";
 import { MessageUtil } from "../../utils/message.util";
 import { OrmInstaller, readTemplate, updateEnvExampleIfNeeded } from "./orm-installer.types";
@@ -10,7 +10,7 @@ import { OrmInstaller, readTemplate, updateEnvExampleIfNeeded } from "./orm-inst
 //                              CLEAN METHOD
 // =============================================================================
 
-const setUpMongooseClean = async (tree: VirtualTree): Promise<void> => {
+const setUpMongooseClean = async (tree: VirtualTreeService): Promise<void> => {
     const mongooseDir = "src/infrastructure/repositories/mongoose";
 
     MessageUtil.info(`\nGenerating mongoose module in ${mongooseDir}...`);
@@ -34,7 +34,7 @@ const setUpMongooseClean = async (tree: VirtualTree): Promise<void> => {
 //                              FEATURED  METHOD
 // =============================================================================
 
-const setUpMongooseFeatured = async (tree: VirtualTree, config: ConfigChoice): Promise<void> => {
+const setUpMongooseFeatured = async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
     const productDir = "src/product";
 
     MessageUtil.info(`\nGenerating mongoose example  entity in ${productDir}...`);
@@ -76,7 +76,7 @@ export const mongooseInstaller: OrmInstaller = {
     supportedDatabases: [DATABASE.MONGODB],
     dependencies: ["@nestjs/mongoose", "mongoose"],
 
-    async run(tree: VirtualTree, config: ConfigChoice): Promise<string> {
+    async run(tree: VirtualTreeService, config: ConfigChoice): Promise<string> {
         MessageUtil.info('\nInstalling Mongoose...');
 
         if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) {

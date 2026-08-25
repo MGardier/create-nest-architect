@@ -5,7 +5,7 @@ import { tmpdir } from "os";
 import { join, resolve } from "path";
 import { ARCHITECTURE_TYPE } from "../config/choices";
 import { ConfigChoice } from "../config/config.types";
-import { VirtualTree } from "../services/tree.service";
+import { VirtualTreeService } from "../services/virtual-tree.service";
 import { MessageUtil } from "../utils/message.util";
 import type { Step } from "./step.types";
 
@@ -24,7 +24,7 @@ const getTemplateRepo = (architectureType: ARCHITECTURE_TYPE): string =>
  * tree (.git excluded). The target directory is never touched here:
  * the tree's commit is the only disk write.
  */
-const cloneRepo = async (tree: VirtualTree, configChoice: ConfigChoice): Promise<void> => {
+const cloneRepo = async (tree: VirtualTreeService, configChoice: ConfigChoice): Promise<void> => {
   const templateRepo: string = getTemplateRepo(configChoice.architectureType);
 
   if (existsSync(resolve(process.cwd(), configChoice.projectName))) {
