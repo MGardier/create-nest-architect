@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { ConfigChoice } from "./config/config.types";
 import { VirtualTreeService } from "./services/virtual-tree.service";
 import { finalizeStep } from "./steps/finalize.step";
-import { loadTemplateStep } from "./steps/load-template.step";
+import { setupTemplate } from "./steps/template.step";
 import { setupOrm } from "./steps/orm.step";
 import { installStep } from "./steps/post/install.step";
 import type { PostStep, Step } from "./steps/step.types";
@@ -12,7 +12,7 @@ import type { PostStep, Step } from "./steps/step.types";
  * - postSteps[] : run on the real project directory, after the commit.
  */
 const STEPS: Step[] = [
-  loadTemplateStep,
+  setupTemplate,
   setupOrm,
   finalizeStep,
 ];
