@@ -6,13 +6,16 @@
   "bugs": {
     "url": "https://github.com/MGardier/create-nest-architect/issues"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/cli.js",
   "bin": {
-    "create-nest-architect": "./dist/index.js"
+    "create-nest-architect": "./dist/cli.js"
   },
   "scripts": {
     "build": "npx tsx scripts/build.ts",
-    "dev": "npx tsx src/index.ts",
+    "dev": "npx tsx src/cli.ts",
+    "typecheck:tests": "npx tsc --noEmit -p tsconfig.tests.json",
+    "test:unit": "npx tsx --test tests/unit/*.test.ts",
+    "test:e2e": "npm run build && npm run typecheck:tests && npx tsx --test tests/e2e/scaffold.e2e.test.ts",
     "prepublishOnly": "npm run build"
   },
   "author": "Maxime Gardier",
@@ -32,7 +35,7 @@
     "url": "https://github.com/MGardier/create-nest-architect.git"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=24.0"
   },
   "keywords": [
     "nestjs",
