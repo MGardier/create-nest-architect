@@ -1,10 +1,9 @@
-import { promisify } from "util";
-import { exec as execCb } from "child_process";
 import { existsSync, promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join, resolve } from "path";
 import { ARCHITECTURE_TYPE } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
+import { CommandService } from "../../services/command.service";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
 import { TemplateMeta } from "./template-setup.types";
@@ -34,16 +33,13 @@ export const FeaturedSetup = {
       process.exit(1);
     }
 
-    const exec = promisify(execCb);
     const tmpRoot = await fs.mkdtemp(join(tmpdir(), "create-nest-architect-"));
     const cloneDir = join(tmpRoot, "template");
 
     try {
-      const { stdout, stderr } = await exec(
+      await CommandService.run(
         `git clone --depth 1 --branch main ${FEATURED_META.repoUrl} ${cloneDir}`
       );
-      MessageUtil.info(stdout);
-      if (stderr) MessageUtil.info(stderr);
 
       // The target directory is never touched here: the tree's commit is the only disk write
       await tree.fromTemplateDir(cloneDir);

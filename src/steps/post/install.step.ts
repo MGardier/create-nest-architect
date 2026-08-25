@@ -1,7 +1,6 @@
-import { promisify } from "util";
-import { exec as execCb } from "child_process";
 import { resolve } from "path";
 import { findOrmMeta } from "../orm/registry";
+import { CommandService } from "../../services/command.service";
 import { MessageUtil } from "../../utils/message.util";
 import type { PostStep } from "../step.types";
 
@@ -14,7 +13,6 @@ export const installStep: PostStep = {
   run: async (configChoice) => {
     MessageUtil.info("\nInstalling dependencies...");
 
-    const exec = promisify(execCb);
     const targetDir = resolve(process.cwd(), configChoice.projectName);
     const { packager } = configChoice;
 
@@ -24,9 +22,7 @@ export const installStep: PostStep = {
       : packager.install;
 
     try {
-      const { stdout, stderr } = await exec(command, { cwd: targetDir });
-      MessageUtil.info(stdout);
-      if (stderr) MessageUtil.info(stderr);
+      await CommandService.run(command, { cwd: targetDir });
       MessageUtil.success("Dependencies successfully installed");
     } catch (err) {
       console.info(err);

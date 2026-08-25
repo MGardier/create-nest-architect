@@ -1,5 +1,4 @@
-import { exec as execCb } from "child_process";
-import { promisify } from "util";
+import { CommandService } from "./services/command.service";
 import { MessageUtil } from "./utils/message.util";
 
 
@@ -42,20 +41,12 @@ const isAtLeast = (version: Version, minimum: Version): boolean =>
 //                            REQUIREMENT METHODS
 // =============================================================================
 
-const exec = promisify(execCb);
-
 const hasSupportedNode = async (): Promise<boolean> =>
   isAtLeast(toVersion(process.versions.node), toVersion(MINIMUM_NODE_VERSION));
 
 /** The template is fetched with `git clone` (steps/load-template.step.ts). */
-const hasGit = async (): Promise<boolean> => {
-  try {
-    await exec("git --version");
-    return true;
-  } catch {
-    return false;
-  }
-};
+const hasGit = async (): Promise<boolean> =>
+  CommandService.isAvailable("git --version");
 
 
 // =============================================================================
