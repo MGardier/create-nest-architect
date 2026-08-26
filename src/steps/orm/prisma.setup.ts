@@ -2,7 +2,7 @@ import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
-import { FsUtil } from "../../utils/fs.util";
+import { ModuleInjectorService } from "../../services/module-injector.service";
 import { MessageUtil } from "../../utils/message.util";
 import { OrmMeta, readTemplate, updateEnvExampleIfNeeded } from "./orm-setup.types";
 
@@ -79,21 +79,16 @@ export const PrismaSetup = {
 
   updateAppModule: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
     MessageUtil.info(`\nUpdating app.module...`);
-    const isClean = config.architectureType === ARCHITECTURE_TYPE.CLEAN;
 
-    const appModuleContent = isClean
-      ? FsUtil.addNewModuleClean(
-        tree.read("src/app.module.ts"),
-        `import { PrismaModule } from './infrastructure/repositories/prisma/.config/prisma.module'`,
-        `PrismaModule`
-      )
-      : FsUtil.addNewModuleFeatured(
-        tree.read("src/app.module.ts"),
-        "import { PrismaModule } from 'prisma/prisma.module'",
-        "PrismaModule"
-      );
+    // Only the import path differs between the two architectures
+    const importPath = config.architectureType === ARCHITECTURE_TYPE.CLEAN
+      ? "./infrastructure/repositories/prisma/.config/prisma.module"
+      : "prisma/prisma.module";
 
-    tree.write("src/app.module.ts", appModuleContent);
+    tree.write("src/app.module.ts", ModuleInjectorService.addModuleImport(
+      tree.read("src/app.module.ts"),
+      { importPath, namedImports: ["PrismaModule"], entry: "PrismaModule" }
+    ));
   },
 
   writePrismaConfig: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
@@ -102,7 +97,7 @@ export const PrismaSetup = {
 
     // Featured lives where Prisma looks by default, Clean must say where its schema is
     const prismaConfigContent = config.architectureType === ARCHITECTURE_TYPE.CLEAN
-      ? FsUtil.addOptionInPrismaConfig(template, `  schema: '${prismaDir(config)}/schema.prisma'`)
+      ? ModuleInjectorService.addPrismaConfigOption(template, "schema", `'${prismaDir(config)}/schema.prisma'`)
       : template;
 
     tree.write("prisma.config.ts", prismaConfigContent);

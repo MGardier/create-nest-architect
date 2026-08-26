@@ -2,7 +2,7 @@ import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
-import { FsUtil } from "../../utils/fs.util";
+import { ModuleImport, ModuleInjectorService } from "../../services/module-injector.service";
 import { MessageUtil } from "../../utils/message.util";
 import { OrmMeta, readTemplate, updateEnvExampleIfNeeded } from "./orm-setup.types";
 
@@ -24,7 +24,7 @@ export const MONGOOSE_META: OrmMeta = {
 /** Clean isolates Mongoose in the infrastructure layer... */
 const MONGOOSE_DIR = "src/infrastructure/repositories/mongoose";
 
-/** ...while Featured wires it straight into the example feature. */
+/** ...while Featured keeps it in the example feature folder. */
 const PRODUCT_DIR = "src/product";
 
 const entityPath = (config: ConfigChoice): string =>
@@ -33,15 +33,41 @@ const entityPath = (config: ConfigChoice): string =>
         : `${PRODUCT_DIR}/entities/product.entity.ts`;
 
 // =============================================================================
+//                            APP MODULE IMPORT
+// =============================================================================
+
+
+const connectionUrl = (config: ConfigChoice): string =>
+    `process.env.DATABASE_URL || '${DATABASE_META[config.database].envUrlExample}'`;
+
+/** Clean imports the MongooseModule it owns... */
+const CLEAN_IMPORT: ModuleImport = {
+    importPath: "./infrastructure/repositories/mongoose/mongoose.module",
+    namedImports: ["MongooseModule"],
+    entry: "MongooseModule",
+};
+
+/** ...Featured connects through the package itself. */
+const featuredImport = (config: ConfigChoice): ModuleImport => ({
+    importPath: "@nestjs/mongoose",
+    namedImports: ["MongooseModule"],
+    entry: `MongooseModule.forRoot(${connectionUrl(config)})`,
+});
+
+const appModuleImport = (config: ConfigChoice): ModuleImport =>
+    config.architectureType === ARCHITECTURE_TYPE.CLEAN
+        ? CLEAN_IMPORT
+        : featuredImport(config);
+
+// =============================================================================
 //                              SETUP
 // =============================================================================
 
 /**
  * One method per file written, in the order of MONGOOSE_ACTIONS
  * (orm.step.ts). The two architectures are not symmetric — Clean owns a
- * MongooseModule of its own, Featured registers the schema inside the
- * example feature module — so the methods that concern only one of them
- * return early for the other.
+ * MongooseModule of its own, Featured imports it from the package — so
+ * the methods that concern only one of them return early for the other.
  */
 export const MongooseSetup = {
 
@@ -59,45 +85,13 @@ export const MongooseSetup = {
         tree.write(path, await readTemplate(TEMPLATE_PATH.mongoose.entity));
     },
 
-    updateProductModule: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-        // Clean has no feature module to register the schema into
-        if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) return;
-
-        MessageUtil.info(`\nUpdating example entity module...`);
-        const newMongooseModuleForProductModule = `MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])`;
-        const newImportsForProductModule = `
-        import { MongooseModule } from '@nestjs/mongoose';
-        import { Product, ProductSchema } from './entities/product.entity';
-    `
-        const newProductModuleContent = FsUtil.addNewModuleFeatured(
-            tree.read(`${PRODUCT_DIR}/product.module.ts`),
-            newImportsForProductModule,
-            newMongooseModuleForProductModule
-        );
-        tree.write(`${PRODUCT_DIR}/product.module.ts`, newProductModuleContent);
-    },
-
     updateAppModule: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
         MessageUtil.info(`\nUpdating app.module...`);
 
-        if (config.architectureType === ARCHITECTURE_TYPE.CLEAN) {
-            const appModuleContent = FsUtil.addNewModuleClean(
-                tree.read("src/app.module.ts"),
-                `import { MongooseModule } from './infrastructure/repositories/mongoose/mongoose.module'`,
-                `MongooseModule`
-            );
-            tree.write("src/app.module.ts", appModuleContent);
-            return;
-        }
-
-        const dbUrl: string = `'${DATABASE_META[config.database].envUrlExample}'`;
-        const mongooseImportModule: string = `MongooseModule.forRoot(process.env.DATABASE_URL || ${dbUrl})`;
-        const newAppModuleContent = FsUtil.addNewModuleFeatured(
+        tree.write("src/app.module.ts", ModuleInjectorService.addModuleImport(
             tree.read("src/app.module.ts"),
-            "import { MongooseModule } from '@nestjs/mongoose'",
-            mongooseImportModule
-        );
-        tree.write("src/app.module.ts", newAppModuleContent);
+            appModuleImport(config)
+        ));
     },
 
     updateEnvExample: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {

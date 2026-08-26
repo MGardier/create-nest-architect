@@ -34,7 +34,6 @@ const PRISMA_ACTIONS: OrmAction[] = [
 const MONGOOSE_ACTIONS: OrmAction[] = [
   { name: "module", run: MongooseSetup.writeModule },
   { name: "entity", run: MongooseSetup.writeEntity },
-  { name: "product-module", run: MongooseSetup.updateProductModule },
   { name: "app-module", run: MongooseSetup.updateAppModule },
   { name: "env-example", run: MongooseSetup.updateEnvExample },
   { name: "next-steps", run: MongooseSetup.nextSteps },
