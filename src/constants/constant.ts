@@ -9,7 +9,28 @@ export const TEMPLATE_PATH = {
   },
 
   mongoose: {
-    module: "mongoose/mongoose.module.ts.template",
-    entity: "mongoose/mongoose.product.entity.ts.template",
+    /** The connection module, shared by both architectures. */
+    database: "mongoose/database.module.ts.template",
+
+    /** Featured keeps the whole example in one feature folder. */
+    featured: {
+      entity: "mongoose/example/featured/product.entity.ts.template",
+      dto: "mongoose/example/featured/create-product.dto.ts.template",
+      service: "mongoose/example/featured/product.service.ts.template",
+      controller: "mongoose/example/featured/product.controller.ts.template",
+      module: "mongoose/example/featured/product.module.ts.template",
+    },
+
+    /** Clean spreads the same example across its four layers. */
+    clean: {
+      entity: "mongoose/example/clean/product.entity.ts.template",
+      repository: "mongoose/example/clean/product.repository.ts.template",
+      useCase: "mongoose/example/clean/create-product.use-case.ts.template",
+      schema: "mongoose/example/clean/product.schema.ts.template",
+      mongooseRepository: "mongoose/example/clean/product.mongoose.repository.ts.template",
+      dto: "mongoose/example/clean/create-product.dto.ts.template",
+      controller: "mongoose/example/clean/product.controller.ts.template",
+      module: "mongoose/example/clean/product.module.ts.template",
+    },
   },
 } as const;

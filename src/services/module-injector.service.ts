@@ -8,11 +8,24 @@ export interface ModuleImport {
   entry: string;
 }
 
+/** What it takes to register a global pipe in the bootstrap function. */
+export interface GlobalPipe {
+
+  importPath: string;
+  namedImports: string[];
+
+  /** The instantiation itself, e.g. `new ValidationPipe({ whitelist: true })` */
+  expression: string;
+}
+
 /** The file name is irrelevant in memory, but the parser wants one. */
 const VIRTUAL_FILE = "source.ts";
 
 /** The prisma config im template is built by this call, not by the first call of the file config() but the second defineConfig(). */
 const DEFINE_CONFIG = "defineConfig";
+
+/** Matches `app.listen(...)`, awaited or not — the last statement of bootstrap(). */
+const LISTEN_CALL = /\.listen\s*\(/;
 
 const createProject = (): Project =>
   new Project({
@@ -80,11 +93,53 @@ export class ModuleInjectorService {
 
     return file.getFullText();
   }
+
+  /** Registers a global pipe in main.ts, right before the app starts listening. */
+  static addGlobalPipe(source: string, pipe: GlobalPipe): string {
+    const project = createProject();
+    const file = project.createSourceFile(VIRTUAL_FILE, source);
+
+    const listen = findListenStatement(file);
+
+    // Idempotent: a second run must not stack the same pipe twice
+    const registration = `app.useGlobalPipes(${pipe.expression});`;
+    if (file.getFullText().includes(registration)) return file.getFullText();
+
+    const existing = file.getImportDeclaration(
+      (declaration) => declaration.getModuleSpecifierValue() === pipe.importPath
+    );
+
+    if (existing) {
+      const alreadyImported = existing.getNamedImports().map((named) => named.getName());
+      existing.addNamedImports(pipe.namedImports.filter((name) => !alreadyImported.includes(name)));
+    } else {
+      file.addImportDeclaration({
+        moduleSpecifier: pipe.importPath,
+        namedImports: pipe.namedImports,
+      });
+    }
+
+    const block = listen.getParentIfKindOrThrow(SyntaxKind.Block);
+    block.insertStatements(block.getStatements().indexOf(listen), registration);
+
+    return file.getFullText();
+  }
 }
 
 // =============================================================================
 //                              AST NAVIGATION
 // =============================================================================
+
+/** The `await app.listen(...)` statement of the bootstrap function. */
+const findListenStatement = (file: ReturnType<Project["createSourceFile"]>) => {
+  const statement = file
+    .getDescendantsOfKind(SyntaxKind.ExpressionStatement)
+    .find((candidate) => LISTEN_CALL.test(candidate.getText()));
+
+  if (!statement) throw new Error("No app.listen() call found in the bootstrap file.");
+
+  return statement;
+};
 
 /** The `imports: [...]` of the first @Module decorator of the file. */
 const getModuleImportsArray = (file: ReturnType<Project["createSourceFile"]>) => {
