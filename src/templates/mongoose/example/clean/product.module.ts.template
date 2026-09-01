@@ -1,0 +1,23 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CreateProductUseCase } from '../application/use-cases/create-product.use-case';
+import { PRODUCT_REPOSITORY } from '../domain/repositories/product.repository';
+import { ProductMongooseRepository } from '../infrastructure/repositories/mongoose/product.mongoose.repository';
+import { ProductSchema, ProductSchemaClass } from '../infrastructure/repositories/mongoose/schemas/product.schema';
+import { ProductController } from './controllers/product.controller';
+
+/**
+ * Where the layers are wired together — the only file that is allowed
+ * to know all of them at once.
+ */
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: ProductSchemaClass.name, schema: ProductSchema }]),
+  ],
+  controllers: [ProductController],
+  providers: [
+    CreateProductUseCase,
+    { provide: PRODUCT_REPOSITORY, useClass: ProductMongooseRepository },
+  ],
+})
+export class ProductModule {}

@@ -1,0 +1,15 @@
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { CreateProductUseCase } from '../../application/use-cases/create-product.use-case';
+import { Product } from '../../domain/entities/product.entity';
+import { CreateProductDto } from '../dto/create-product.dto';
+
+@Controller('products')
+export class ProductController {
+  constructor(private readonly createProductUseCase: CreateProductUseCase) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() dto: CreateProductDto): Promise<Product> {
+    return await this.createProductUseCase.execute(dto.name, dto.price);
+  }
+}

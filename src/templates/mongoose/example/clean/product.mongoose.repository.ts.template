@@ -1,0 +1,43 @@
+import { ConflictException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, mongo } from 'mongoose';
+import { Product } from '../../../domain/entities/product.entity';
+import { ProductRepository } from '../../../domain/repositories/product.repository';
+import { ProductDocument, ProductSchemaClass } from './schemas/product.schema';
+
+/**
+ * The adapter: it implements the domain port with Mongoose. Replacing
+ * MongoDB means writing another class here — the domain and the use
+ * cases do not change.
+ */
+@Injectable()
+export class ProductMongooseRepository extends ProductRepository {
+  constructor(
+    @InjectModel(ProductSchemaClass.name)
+    private readonly productModel: Model<ProductSchemaClass>,
+  ) {
+    super();
+  }
+
+  async create(product: Product): Promise<Product> {
+    try {
+      const created = await this.productModel.create({
+        name: product.name,
+        price: product.price,
+      });
+
+      return ProductMongooseRepository.toDomain(created);
+    } catch (error) {
+      // 11000 is MongoDB's duplicate key error: the unique index on `name` rejected it
+      if (error instanceof mongo.MongoServerError && error.code === 11000) {
+        throw new ConflictException(`Product "${product.name}" already exists`);
+      }
+      throw error;
+    }
+  }
+
+  /** The only place a Mongoose document becomes a domain entity. */
+  private static toDomain(document: ProductDocument): Product {
+    return new Product(document.name, document.price, document._id.toString());
+  }
+}

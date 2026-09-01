@@ -1,0 +1,14 @@
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ProductService } from './product.service';
+
+@Controller('products')
+export class ProductController {
+  constructor(private readonly productService: ProductService) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() dto: CreateProductDto) {
+    return await this.productService.create(dto);
+  }
+}

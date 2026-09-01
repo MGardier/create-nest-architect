@@ -1,0 +1,18 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { Product } from '../../domain/entities/product.entity';
+import { PRODUCT_REPOSITORY, ProductRepository } from '../../domain/repositories/product.repository';
+
+/**
+ * One use case, one business action. It depends on the port only, so it
+ * can be unit-tested with an in-memory repository.
+ */
+@Injectable()
+export class CreateProductUseCase {
+  constructor(
+    @Inject(PRODUCT_REPOSITORY) private readonly productRepository: ProductRepository,
+  ) {}
+
+  async execute(name: string, price: number): Promise<Product> {
+    return await this.productRepository.create(new Product(name, price));
+  }
+}

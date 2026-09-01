@@ -1,0 +1,12 @@
+import { Product } from '../entities/product.entity';
+
+/**
+ * The port. The domain declares what it needs; the infrastructure layer
+ * provides an implementation. Nothing here knows Mongoose exists.
+ */
+export abstract class ProductRepository {
+  abstract create(product: Product): Promise<Product>;
+}
+
+/** Injection token: an abstract class cannot be resolved by type alone at runtime. */
+export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');

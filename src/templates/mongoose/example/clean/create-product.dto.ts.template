@@ -1,0 +1,16 @@
+import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+
+/**
+ * The HTTP contract. It belongs to the presentation layer: the domain
+ * entity must never be exposed directly to the outside world.
+ */
+export class CreateProductDto {
+
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsInt()
+  @Min(0)
+  price!: number;
+}

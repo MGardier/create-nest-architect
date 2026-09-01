@@ -1,0 +1,11 @@
+/**
+ * The business object, and nothing else. No decorator, no Mongoose, no
+ * NestJS: the domain layer must stay replaceable-database-agnostic.
+ */
+export class Product {
+  constructor(
+    public readonly name: string,
+    public readonly price: number,
+    public readonly id?: string,
+  ) {}
+}
