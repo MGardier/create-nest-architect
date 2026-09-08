@@ -37,7 +37,7 @@
     "url": "https://github.com/MGardier/create-nest-architect.git"
   },
   "engines": {
-    "node": ">=24.0"
+    "node": "^20.19 || ^22.12 || >=24"
   },
   "keywords": [
     "nestjs",
