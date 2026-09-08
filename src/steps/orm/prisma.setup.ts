@@ -14,7 +14,10 @@ export const PRISMA_META: OrmMeta = {
   id: "prisma",
   label: "📦   Prisma",
   supportedDatabases: [DATABASE.MYSQL],
-  dependencies: ["prisma", "@prisma/client"],
+  dependencies: [
+  { name: "prisma", version: "^7.10.0", scope: "devDependencies" },
+  { name: "@prisma/client", version: "^7.10.0", scope: "dependencies" },
+],
 };
 
 // =============================================================================

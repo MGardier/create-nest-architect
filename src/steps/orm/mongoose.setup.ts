@@ -15,11 +15,10 @@ export const MONGOOSE_META: OrmMeta = {
     label: "📦   Mongoose",
     supportedDatabases: [DATABASE.MONGODB],
     dependencies: [
-        "@nestjs/mongoose",
-        "mongoose",
-        // The generated DTO is validated: without these two the decorators are inert
-        "class-validator",
-        "class-transformer",
+        { name: "@nestjs/mongoose", version: "^12.0.0", scope: "dependencies" },
+        { name: "mongoose", version: "^9.9.0", scope: "dependencies" },
+        { name: "class-validator", version: "^0.15.0", scope: "dependencies" },
+        { name: "class-transformer", version: "^0.5.1", scope: "dependencies" },
     ],
 };
 

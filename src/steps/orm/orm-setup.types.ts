@@ -5,6 +5,14 @@ import type { ConfigChoice } from "../../config/config.types";
 import type { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
 
+
+export interface OrmDependency {
+  name: string;
+  version: string;
+  scope: "dependencies" | "devDependencies";
+}
+
+
 /**
  * What an ORM *is*: metadata only, consulted by the prompt, the
  * validation and the post-commit install. What an ORM *does* lives in
@@ -25,8 +33,11 @@ export interface OrmMeta {
   supportedDatabases: DATABASE[];
 
   /** Packages installed by the post-commit install step */
-  dependencies: string[];
+  dependencies: OrmDependency[];
 }
+
+
+
 
 /**
  * What an ORM *does*, as data — mirroring Step in step.types.ts: one
@@ -59,3 +70,10 @@ export const updateEnvExampleIfNeeded = (tree: VirtualTreeService, key: string, 
   tree.write(".env.example", `${current}\n${key}="${value}"\n`);
   MessageUtil.success(`.env.example correctly updated with ${key}`);
 };
+
+
+
+export const formatDependency = (dep: OrmDependency): string =>
+  `${dep.name}@${dep.version}`;
+
+
