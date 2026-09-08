@@ -1,6 +1,4 @@
 export const TEMPLATE_PATH = {
-  ENV_EXAMPLE: ".env.example.template",
-
   prisma: {
     schema: "prisma/schema.prisma.template",
     service: "prisma/prisma.service.ts.template",
