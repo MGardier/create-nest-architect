@@ -15,6 +15,9 @@ export interface IPackagerCommands {
   /** Add package */
   add: (packages: string) => string;
 
+  /** Add package as a dev dependency */
+  addDev: (packages: string) => string;
+
   /** Execute binary */
   exec: (command: string) => string;
 
@@ -32,6 +35,10 @@ export class NpmCommands implements IPackagerCommands {
 
   add(packages: string): string {
     return `npm install ${packages}`;
+  }
+
+  addDev(packages: string): string {
+    return `npm install -D ${packages}`;
   }
 
   exec(command: string): string {
@@ -52,6 +59,10 @@ export class PnpmCommands implements IPackagerCommands {
 
   add(packages: string): string {
     return `pnpm add ${packages}`;
+  }
+
+  addDev(packages: string): string {
+    return `pnpm add -D ${packages}`;
   }
 
   exec(command: string): string {
@@ -75,6 +86,10 @@ export class YarnCommands implements IPackagerCommands {
     return `yarn add ${packages}`;
   }
 
+  addDev(packages: string): string {
+    return `yarn add -D ${packages}`;
+  }
+
   exec(command: string): string {
     return `yarn ${command}`;
   }
@@ -93,6 +108,10 @@ export class BunCommands implements IPackagerCommands {
 
   add(packages: string): string {
     return `bun add ${packages}`;
+  }
+
+  addDev(packages: string): string {
+    return `bun add -D ${packages}`;
   }
 
   exec(command: string): string {
