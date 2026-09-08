@@ -1,15 +1,10 @@
-import { execa, parseCommandString } from "execa";
+import { execa, ExecaError, parseCommandString } from "execa";
 import { MessageUtil } from "../utils/message.util";
 
 
 export interface CommandOptions {
   /** Directory the command runs in — defaults to the current one */
   cwd?: string;
-}
-
-export interface CommandResult {
-  stdout: string;
-  stderr: string;
 }
 
 // =============================================================================
@@ -25,14 +20,19 @@ export interface CommandResult {
  */
 export class CommandService {
 
-  static async run(command: string, options: CommandOptions = {}): Promise<CommandResult> {
+  /**
+   * Output is captured, never relayed: a successful command says
+   * nothing, a failing one prints everything it had to say  
+   */
+  static async run(command: string, options: CommandOptions = {}): Promise<void> {
     const [file, ...args] = parseCommandString(command);
-    const { stdout, stderr } = await execa(file, args, { cwd: options.cwd });
 
-    if (stdout) MessageUtil.info(stdout);
-    if (stderr) MessageUtil.info(stderr);
-
-    return { stdout, stderr };
+    try {
+      await execa(file, args, { cwd: options.cwd });
+    } catch (err) {
+      if (err instanceof ExecaError) MessageUtil.error(err.stderr || err.stdout || err.shortMessage);
+      throw err;
+    }
   }
 
   /** Whether a binary answers at all — the requirements checks ask nothing more. */

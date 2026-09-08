@@ -4,6 +4,7 @@ import { formatDependency, type OrmDependency } from "../orm/orm-setup.types";
 import { CommandService } from "../../services/command.service";
 import type { IPackagerCommands } from "../../constants/packager.constants";
 import { MessageUtil } from "../../utils/message.util";
+import { SpinnerUtil } from "../../utils/spinner.util";
 import type { PostStep } from "../step.types";
 
 /**
@@ -41,20 +42,23 @@ export const buildInstallCommands = (
 export const installStep: PostStep = {
   name: "install",
   run: async (configChoice) => {
-    MessageUtil.info("\nInstalling dependencies...");
-
     const targetDir = resolve(process.cwd(), configChoice.projectName);
     const { packager } = configChoice;
 
     const commands = buildInstallCommands(findOrmMeta(configChoice.orm)!.dependencies, packager);
 
+    // The commands are silent: this is the only sign the CLI is alive
+    const spinner = new SpinnerUtil("Installation in progress... ☕");
+    spinner.start();
+
     try {
       for (const command of commands) {
         await CommandService.run(command, { cwd: targetDir });
       }
+      spinner.stop();
       MessageUtil.success("Dependencies successfully installed");
-    } catch (err) {
-      console.info(err);
+    } catch {
+      spinner.stop();
       MessageUtil.error("An error occurred when trying to install dependencies, please do it manually.");
       process.exit(1);
     }
