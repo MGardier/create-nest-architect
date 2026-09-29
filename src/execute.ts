@@ -14,8 +14,9 @@ import type { PostStep, Step } from "./steps/step.types";
  */
 const STEPS: Step[] = [
   setupTemplate,
-  setupOrm,
   setupModuleSystem,
+  setupOrm,
+
   finalizeStep,
 ];
 

@@ -2,7 +2,7 @@ import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
-import { ModuleInjectorService } from "../../services/module-injector.service";
+import { ModuleInjectorService } from "../../services/module-injector/module-injector.service";
 import { MessageUtil } from "../../utils/message.util";
 import { OrmMeta, readTemplate, updateEnvExampleIfNeeded } from "./orm-setup.types";
 

@@ -1,4 +1,12 @@
 export const TEMPLATE_PATH = {
+  /** The Jest configuration a CommonJS project needs, in place of Vitest's. */
+  module: {
+    cjs: {
+      jestConfig: "module/cjs/jest.config.ts.template",
+      jestE2e: "module/cjs/jest-e2e.json.template",
+    },
+  },
+
   prisma: {
     schema: "prisma/schema.prisma.template",
     service: "prisma/prisma.service.ts.template",
