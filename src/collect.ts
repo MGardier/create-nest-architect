@@ -2,6 +2,7 @@ import { ConfigChoice, ConfigData, PartialConfig, Question } from "./config/conf
 import {
   askArchitecture,
   askDatabase,
+  askModuleSystem,
   askOrm,
   askPackager,
   askProjectName,
@@ -18,6 +19,7 @@ import { MessageUtil } from "./utils/message.util";
 const questions: Readonly<Question[]> = [
   { id: "projectName", ask: askProjectName },
   { id: "packagerType", ask: askPackager },
+  { id: "moduleSystem", ask: askModuleSystem },
   { id: "architectureType", ask: askArchitecture },
   { id: "database", ask: askDatabase },
   { id: "orm", ask: askOrm },

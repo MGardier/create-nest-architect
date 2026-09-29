@@ -1,4 +1,4 @@
-import { ARCHITECTURE_TYPE, DATABASE, PACKAGER_TYPE } from "./choices";
+import { ARCHITECTURE_TYPE, DATABASE, MODULE_SYSTEM, PACKAGER_TYPE } from "./choices";
 import { IPackagerCommands } from "../constants/packager.constants";
 
 
@@ -14,6 +14,7 @@ import { IPackagerCommands } from "../constants/packager.constants";
 export interface ConfigData {
   projectName: string;
   packagerType: PACKAGER_TYPE;
+  moduleSystem: MODULE_SYSTEM;
   architectureType: ARCHITECTURE_TYPE;
   database: DATABASE;
   orm: string;

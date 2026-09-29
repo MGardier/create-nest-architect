@@ -6,6 +6,8 @@ import {
   ARCHITECTURE_TYPE,
   DATABASE,
   DATABASE_CHOICES,
+  MODULE_SYSTEM,
+  MODULE_SYSTEM_CHOICES,
   PACKAGER_CHOICES,
   PACKAGER_TYPE,
 } from "./choices";
@@ -25,6 +27,14 @@ export const askPackager = async (): Promise<PACKAGER_TYPE | undefined> => {
   return PromptService.askUserWithChoices(
     "Which package manager would you like to use?",
     PACKAGER_CHOICES,
+    "select"
+  );
+};
+
+export const askModuleSystem = async (): Promise<MODULE_SYSTEM | undefined> => {
+  return PromptService.askUserWithChoices(
+    "Which module system would you like to use?",
+    MODULE_SYSTEM_CHOICES,
     "select"
   );
 };

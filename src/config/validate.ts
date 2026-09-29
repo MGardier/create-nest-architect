@@ -13,6 +13,8 @@ const hasProjectName = (config: PartialConfig): boolean => !!config.projectName;
 
 const hasPackagerType = (config: PartialConfig): boolean => !!config.packagerType;
 
+const hasModuleSystem = (config: PartialConfig): boolean => !!config.moduleSystem;
+
 const hasArchitectureType = (config: PartialConfig): boolean => !!config.architectureType;
 
 const hasDatabase = (config: PartialConfig): boolean => !!config.database;
@@ -35,6 +37,7 @@ const isOrmCompatibleWithDatabase = (config: PartialConfig): boolean => {
 const validations: Validation[] = [
   { check: hasProjectName, message: () => "You must specify a name to create project." },
   { check: hasPackagerType, message: () => "You must choose a package manager." },
+  { check: hasModuleSystem, message: () => "You must choose a module system." },
   { check: hasArchitectureType, message: () => "You must choose an architecture." },
   { check: hasDatabase, message: () => "You must choose a database." },
   { check: hasOrm, message: () => "You must choose an Orm or Odm." },

@@ -16,6 +16,11 @@ export enum PACKAGER_TYPE {
   BUN = "BUN",
 }
 
+export enum MODULE_SYSTEM {
+  ESM = "ESM",
+  CJS = "CJS",
+}
+
 export enum DATABASE {
   MYSQL = "mysql",
   MONGODB = "mongodb",
@@ -68,6 +73,12 @@ export const PACKAGER_CHOICES: AskChoiceInterface<PACKAGER_TYPE>[] = [
   { title: "⚡   pnpm", value: PACKAGER_TYPE.PNPM },
   { title: "🧶   Yarn", value: PACKAGER_TYPE.YARN },
   { title: "🍞   Bun", value: PACKAGER_TYPE.BUN },
+];
+
+/** The test runner column is padded so it lines up under the prompt. */
+export const MODULE_SYSTEM_CHOICES: AskChoiceInterface<MODULE_SYSTEM>[] = [
+  { title: "🧩   ESM (ES Modules)         [ with vitest ]", value: MODULE_SYSTEM.ESM },
+  { title: "📜   CJS (CommonJS)           [ with jest ]", value: MODULE_SYSTEM.CJS },
 ];
 
 
