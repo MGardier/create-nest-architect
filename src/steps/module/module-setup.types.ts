@@ -7,14 +7,7 @@ export interface ModuleSystemMeta {
   id: MODULE_SYSTEM;
 }
 
-/**
- * What a module system changes, as data — mirroring Step in
- * step.types.ts: one entry per unit of work, run in order by the
- * accumulator loop of module.step.ts.
- *
- * Actions only write into the tree — the pipeline commits it to disk
- * once, after the last step.
- */
+/** One entry per unit of work, run in order by module.step.ts. Actions only write into the tree. */
 export interface ModuleSystemAction {
   name: string;
   when?: (config: ConfigChoice) => boolean;

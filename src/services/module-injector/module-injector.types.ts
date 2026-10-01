@@ -33,5 +33,5 @@ export const DEFINE_CONFIG = "defineConfig";
 /** Matches `app.listen(...)`, awaited or not — the last statement of bootstrap(). */
 export const LISTEN_CALL = /\.listen\s*\(/;
 
-/** The extension ESM requires on its relative imports, and CommonJS does not use. */
+/** The extension ESM requires on relative imports. */
 export const JS_EXTENSION = ".js";

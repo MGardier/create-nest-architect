@@ -1,10 +1,12 @@
+import { posix } from "path";
 import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
-import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { ModuleInjectorService } from "../../services/module-injector/module-injector.service";
+import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
-import { OrmMeta, readTemplate, updateEnvExampleIfNeeded } from "./orm-setup.types";
+import { importPathFor, readTemplateFor } from "../module/module-system.util";
+import { OrmMeta, updateEnvExampleIfNeeded } from "./orm-setup.types";
 
 // =============================================================================
 //                              META
@@ -15,9 +17,11 @@ export const PRISMA_META: OrmMeta = {
   label: "📦   Prisma",
   supportedDatabases: [DATABASE.MYSQL],
   dependencies: [
-  { name: "prisma", version: "^7.10.0", scope: "devDependencies" },
-  { name: "@prisma/client", version: "^7.10.0", scope: "dependencies" },
-],
+    { name: "prisma", version: "^7.10.0", scope: "devDependencies" },
+
+    // prisma.config.ts loads the .env itself: Prisma 7 no longer does it
+    { name: "dotenv", version: "^18.0.0", scope: "devDependencies" },
+  ],
 };
 
 // =============================================================================
@@ -37,73 +41,94 @@ const PRISMA_PROVIDERS: Partial<Record<DATABASE, string>> = {
 //                              PATHS
 // =============================================================================
 
-/**
- * The only thing the architecture changes for most of the files: where
- * they land. Clean keeps Prisma inside the infrastructure layer,
- * Featured keeps it at the project root.
- */
-const prismaDir = (config: ConfigChoice): string =>
+/** The schema belongs to the Prisma CLI; the Nest sources stay under src, or `nest build` rejects them. */
+
+/** Where the Prisma CLI reads its schema and writes its migrations. */
+const schemaDir = (config: ConfigChoice): string =>
   config.architectureType === ARCHITECTURE_TYPE.CLEAN
     ? "src/infrastructure/repositories/prisma/.config"
     : "prisma";
+
+/** Where the Nest module and service land, always under src. */
+const nestModuleDir = (config: ConfigChoice): string =>
+  config.architectureType === ARCHITECTURE_TYPE.CLEAN
+    ? "src/infrastructure/repositories/prisma/.config"
+    : "src/database/prisma";
+
+/** Next to the service that extends it, so its import stays "./generated/client". */
+const generatedClientDir = (config: ConfigChoice): string =>
+  posix.join(nestModuleDir(config), "generated");
+
+/** The generator's `output`, which Prisma resolves from the schema file. */
+const generatedClientPathFromSchema = (config: ConfigChoice): string => {
+  const path = posix.relative(schemaDir(config), generatedClientDir(config));
+
+  return path.startsWith(".") ? path : `./${path}`;
+};
+
+/** The PrismaModule as src/app.module.ts sees it. */
+const prismaModuleImportPath = (config: ConfigChoice): string =>
+  importPathFor(config, `./${posix.relative("src", nestModuleDir(config))}/prisma.module`);
 
 // =============================================================================
 //                              SETUP
 // =============================================================================
 
-/**
- * One method per file written, in the order of PRISMA_ACTIONS
- * (orm.step.ts). Each method resolves its own target path and its own
- * architecture variant: the action table stays free of conditions.
- */
+/** One method per file written, in the order of PRISMA_ACTIONS (orm.step.ts). */
 export const PrismaSetup = {
 
   writeSchema: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-    const schemaPath = `${prismaDir(config)}/schema.prisma`;
+    const schemaPath = `${schemaDir(config)}/schema.prisma`;
     MessageUtil.info(`\nGenerating ${schemaPath}...`);
 
     // supportedDatabases only lists databases present in PRISMA_PROVIDERS
     const provider = PRISMA_PROVIDERS[config.database]!;
-    const schemaContent = (await readTemplate(TEMPLATE_PATH.prisma.schema)).replace("__PROVIDER__", provider);
-    tree.write(schemaPath, schemaContent);
+
+    const schema = (await readTemplateFor(config, TEMPLATE_PATH.prisma.schema))
+      .replace("__PROVIDER__", provider)
+      .replace("__OUTPUT__", generatedClientPathFromSchema(config));
+
+    tree.write(schemaPath, schema);
   },
 
   writeModule: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-    const dir = prismaDir(config);
+    const dir = nestModuleDir(config);
     MessageUtil.info(`\nGenerating prisma.module in ${dir}...`);
-    tree.write(`${dir}/prisma.module.ts`, await readTemplate(TEMPLATE_PATH.prisma.module));
+
+    tree.write(`${dir}/prisma.module.ts`, await readTemplateFor(config, TEMPLATE_PATH.prisma.module));
   },
 
   writeService: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-    const dir = prismaDir(config);
+    const dir = nestModuleDir(config);
     MessageUtil.info(`\nGenerating prisma.service in ${dir}...`);
-    tree.write(`${dir}/prisma.service.ts`, await readTemplate(TEMPLATE_PATH.prisma.service));
+
+    tree.write(`${dir}/prisma.service.ts`, await readTemplateFor(config, TEMPLATE_PATH.prisma.service));
   },
 
   updateAppModule: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
     MessageUtil.info(`\nUpdating app.module...`);
 
-    // Only the import path differs between the two architectures
-    const importPath = config.architectureType === ARCHITECTURE_TYPE.CLEAN
-      ? "./infrastructure/repositories/prisma/.config/prisma.module"
-      : "prisma/prisma.module";
-
     tree.write("src/app.module.ts", ModuleInjectorService.addModuleImport(
       tree.read("src/app.module.ts"),
-      { importPath, namedImports: ["PrismaModule"], entry: "PrismaModule" }
+      {
+        importPath: prismaModuleImportPath(config),
+        namedImports: ["PrismaModule"],
+        entry: "PrismaModule",
+      }
     ));
   },
 
   writePrismaConfig: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
     MessageUtil.info(`\nGenerating prisma.config...`);
-    const template = await readTemplate(TEMPLATE_PATH.prisma.config);
 
-    // Featured lives where Prisma looks by default, Clean must say where its schema is
-    const prismaConfigContent = config.architectureType === ARCHITECTURE_TYPE.CLEAN
-      ? ModuleInjectorService.addPrismaConfigOption(template, "schema", `'${prismaDir(config)}/schema.prisma'`)
-      : template;
+    const template = await readTemplateFor(config, TEMPLATE_PATH.prisma.config);
 
-    tree.write("prisma.config.ts", prismaConfigContent);
+    // Prisma 7 no longer guesses the schema location
+    tree.write("prisma.config.ts", ModuleInjectorService.addPrismaConfigOption(
+      template,
+      "schema",
+      `'${schemaDir(config)}/schema.prisma'`
+    ));
   },
 
   updateEnvExample: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
@@ -112,20 +137,17 @@ export const PrismaSetup = {
 
   /** Writes nothing: closes the setup and returns its recap. */
   nextSteps: async (_tree: VirtualTreeService, config: ConfigChoice): Promise<string> => {
-    const isClean = config.architectureType === ARCHITECTURE_TYPE.CLEAN;
-    MessageUtil.success(
-      isClean
-        ? `\nPrisma module correctly generating and AppModule  correctly updated.`
-        : `\nPrisma folder correctly generating and AppModule  correctly updated.`
-    );
+    MessageUtil.success(`\nPrisma correctly generated and AppModule correctly updated.`);
 
     return `
     👉 Before starting don't forget to :
 
-      - Create .env and connect your provider with Prisma.
-      - Update schema prisma with your entities.
-      - Generate prisma client and database with :
+      - Create .env and set DATABASE_URL to your database connection string.
+      - Add your models to ${schemaDir(config)}/schema.prisma.
+      - Generate the client and the database with :
         $ ${config.packager.exec('prisma migrate dev')}
+
+      The client is generated in ${generatedClientDir(config)} and imported by prisma.service.
     `;
   },
 };

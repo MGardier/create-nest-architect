@@ -28,7 +28,7 @@ export const CJS_META: ModuleSystemMeta = {
 const PACKAGE_JSON = "package.json";
 const TSCONFIG = "tsconfig.json";
 
-/** Only a TypeScript source carries module syntax — a .d.ts is never emitted here. */
+/** Only a TypeScript source carries module syntax. */
 const isTypeScriptSource = (path: string): boolean =>
   path.endsWith(".ts") && !path.endsWith(".d.ts");
 
@@ -36,12 +36,7 @@ const isTypeScriptSource = (path: string): boolean =>
 //                              SETUP
 // =============================================================================
 
-/**
- * One method per unit of work, in the order of CJS_ACTIONS
- * (module.step.ts). Each one reads the tree and writes back into it,
- * so the architecture that produced the files never matters: the same
- * actions convert a Featured and a Clean template alike.
- */
+/** One method per unit of work, in the order of CJS_ACTIONS (module.step.ts). */
 export const CjsSetup = {
 
   removeModuleTypeFromPackageJson: async (tree: VirtualTreeService, _config: ConfigChoice): Promise<void> => {

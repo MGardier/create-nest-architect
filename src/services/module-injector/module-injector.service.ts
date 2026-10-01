@@ -83,12 +83,7 @@ export class ModuleInjectorService {
     return file.getFullText();
   }
 
-  /**
-   * Rewrites `from './user.entity.js'` into `from './user.entity'`.
-   * ESM requires the extension, a CommonJS source never carries it —
-   * and a package of node_modules is left alone, even one whose path
-   * ends in .js.
-   */
+  /** `from './user.entity.js'` becomes `from './user.entity'`. Packages are left alone. */
   static removeJsExtensionFromRelativeImports(source: string): string {
     const project = createProject();
     const file = project.createSourceFile(VIRTUAL_FILE, source);
@@ -104,11 +99,7 @@ export class ModuleInjectorService {
     return file.getFullText();
   }
 
-  /**
-   * Rewrites `await bootstrap();` into `bootstrap();` — a CommonJS
-   * module cannot await at the top level, and main.ts is the only file
-   * of the generated project that does.
-   */
+  /** `await bootstrap();` becomes `bootstrap();` — CommonJS forbids a top-level await. */
   static removeAwaitFromTopLevelCalls(source: string): string {
     const project = createProject();
     const file = project.createSourceFile(VIRTUAL_FILE, source);
@@ -120,7 +111,7 @@ export class ModuleInjectorService {
 
       topLevelAwait.replaceWithText(callWithoutAwait);
 
-      // The rewrite above invalidates the nodes around it: the file has to be searched again
+      // The rewrite invalidates the nodes around it: search the file again
       topLevelAwait = findTopLevelAwait(file);
     }
 
@@ -132,11 +123,7 @@ export class ModuleInjectorService {
 //                              AST EDITION
 // =============================================================================
 
-/**
- * Imports the given names from `importPath`, merging into the import
- * declaration the file already has for that path — importing the same
- * name twice is a syntax error.
- */
+/** Merges into the import the file already has for that path: importing a name twice is a syntax error. */
 const ensureNamedImports = (file: SourceFile, importPath: string, namedImports: string[]): void => {
   const existing = file.getImportDeclaration(
     (declaration) => declaration.getModuleSpecifierValue() === importPath

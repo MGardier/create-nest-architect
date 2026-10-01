@@ -1,4 +1,4 @@
-/** Any parsed JSON file — package.json and tsconfig.json are nothing more than that. */
+/** A parsed JSON file. */
 type JsonObject = Record<string, unknown>;
 
 export abstract class FsUtil {
@@ -23,15 +23,7 @@ export abstract class FsUtil {
 //                             JSON  METHODS
 // =============================================================================
 
-  /**
-   * Every method below takes the file as a string, edits one key and
-   * returns the file as a string — so the VirtualTree stays the single
-   * source of truth.
-   *
-   * `path` is a dotted path to the key: "type" for the root of
-   * package.json, "compilerOptions.types" for a nested key of
-   * tsconfig.json. Missing intermediate objects are created.
-   */
+  /** `path` is dotted: "type", or "compilerOptions.types" for a nested key. */
 
   /** Writes the value at `path`, replacing whatever was there. */
   static setJsonValue(content: string, path: string, value: unknown): string {
@@ -63,7 +55,7 @@ export abstract class FsUtil {
     return FsUtil.stringifyJson(root);
   }
 
-  /** Reorders alphabetically the keys of the object at `path`, the way a packager writes them. */
+  /** Sorts the keys of the object at `path`, the way a packager writes them. */
   static sortJsonKeys(content: string, path: string): string {
     const root = FsUtil.parseJson(content);
     const { holder, key } = FsUtil.reachKeyHolder(root, path);
@@ -80,11 +72,7 @@ export abstract class FsUtil {
 //                             JSON  NAVIGATION
 // =============================================================================
 
-  /**
-   * Walks a dotted path down to the object that holds its last
-   * segment: "compilerOptions.types" returns the compilerOptions
-   * object and the key "types".
-   */
+  /** "compilerOptions.types" returns the compilerOptions object and the key "types". */
   private static reachKeyHolder(root: JsonObject, path: string): { holder: JsonObject; key: string } {
     const segments = path.split(".");
     const key = segments.pop();
@@ -105,7 +93,7 @@ export abstract class FsUtil {
     return JSON.parse(content) as JsonObject;
   }
 
-  /** The formatting every packager and editor expects: two spaces and a trailing newline. */
+  /** Two spaces and a trailing newline, as packagers write it. */
   private static stringifyJson(content: unknown): string {
     return `${JSON.stringify(content, null, 2)}\n`;
   }

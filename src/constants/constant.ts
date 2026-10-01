@@ -1,5 +1,5 @@
 export const TEMPLATE_PATH = {
-  /** The Jest configuration a CommonJS project needs, in place of Vitest's. */
+  /** Jest's configuration, for a CommonJS project. */
   module: {
     cjs: {
       jestConfig: "module/cjs/jest.config.ts.template",

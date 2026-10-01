@@ -4,13 +4,7 @@ import { CjsSetup, CJS_META } from "./module/cjs.setup";
 import type { ModuleSystemAction } from "./module/module-setup.types";
 import type { Step } from "./step.types";
 
-/**
- * What each module system changes on the tree, as data — one entry per
- * unit of work, in the order it happens.
- *
- * Adding a module system = one <system>.setup.ts + one action table +
- * one line in MODULE_SYSTEM_ACTIONS below.
- */
+/** Adding a module system = one <system>.setup.ts + one action table + one line in MODULE_SYSTEM_ACTIONS. */
 
 // =============================================================================
 //                              CJS ACTIONS
@@ -31,10 +25,7 @@ const CJS_ACTIONS: ModuleSystemAction[] = [
 //                              ACTIONS LOOKUP
 // =============================================================================
 
-/**
- * ESM has no table on purpose: the templates are already written in
- * ESM, so the step skips it entirely — see `when` below.
- */
+/** ESM has no table: the templates are already ESM, so the step skips it — see `when`. */
 const MODULE_SYSTEM_ACTIONS: { id: MODULE_SYSTEM; actions: ModuleSystemAction[] }[] = [
   { id: CJS_META.id, actions: CJS_ACTIONS },
 ];
@@ -52,11 +43,7 @@ const findModuleSystemActions = (id: MODULE_SYSTEM): ModuleSystemAction[] => {
 //                           ACCUMULATOR LOOP
 // =============================================================================
 
-/**
- * Runs the action table of the chosen module system on the in-memory
- * tree (an action is skipped when its `when` returns false) and
- * returns the concatenated messages for the final recap.
- */
+/** Runs the action table of the chosen module system and returns its messages for the recap. */
 export const setupModuleSystem: Step = {
   name: "module-system",
 
