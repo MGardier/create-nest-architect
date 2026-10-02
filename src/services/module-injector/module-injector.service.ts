@@ -177,7 +177,7 @@ const findTopLevelAwait = (file: SourceFile): AwaitExpression | undefined => {
 
 /** The options object of the prisma config, i.e. the argument of defineConfig(). */
 const findDefineConfigOptions = (file: SourceFile) => {
-  // The file also calls dotenv's config(): the call has to be found by name
+  // Found by name: the file holds other calls, such as env()
   const call = file
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .find((candidate) => candidate.getExpression().getText() === DEFINE_CONFIG);

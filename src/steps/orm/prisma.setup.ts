@@ -15,9 +15,13 @@ import { OrmMeta, updateEnvExampleIfNeeded } from "./orm-setup.types";
 export const PRISMA_META: OrmMeta = {
   id: "prisma",
   label: "📦   Prisma",
-  supportedDatabases: [DATABASE.MYSQL],
+  supportedDatabases: [DATABASE.POSTGRESQL],
   dependencies: [
     { name: "prisma", version: "^7.10.0", scope: "devDependencies" },
+
+    // The generated client needs its runtime, and Prisma 7 needs a driver adapter
+    { name: "@prisma/client", version: "^7.10.0", scope: "dependencies" },
+    { name: "@prisma/adapter-pg", version: "^7.10.0", scope: "dependencies" },
 
     // prisma.config.ts loads the .env itself: Prisma 7 no longer does it
     { name: "dotenv", version: "^18.0.0", scope: "devDependencies" },
@@ -34,7 +38,7 @@ export const PRISMA_META: OrmMeta = {
  * One entry per database of PRISMA_META.supportedDatabases.
  */
 const PRISMA_PROVIDERS: Partial<Record<DATABASE, string>> = {
-  [DATABASE.MYSQL]: "mysql",
+  [DATABASE.POSTGRESQL]: "postgresql",
 };
 
 // =============================================================================

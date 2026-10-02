@@ -22,7 +22,7 @@ export enum MODULE_SYSTEM {
 }
 
 export enum DATABASE {
-  MYSQL = "mysql",
+  POSTGRESQL = "postgresql",
   MONGODB = "mongodb",
 }
 
@@ -47,10 +47,10 @@ export interface DatabaseMeta {
 }
 
 export const DATABASE_META: Record<DATABASE, DatabaseMeta> = {
-  [DATABASE.MYSQL]: {
-    label: "🐬  MySQL",
-    envUrlExample: "mysql://user:password@localhost:3306/mydb",
-    dockerImage: "mysql:9",
+  [DATABASE.POSTGRESQL]: {
+    label: "🐘  PostgreSQL",
+    envUrlExample: "postgresql://user:password@localhost:5432/mydb",
+    dockerImage: "postgres:17",
   },
   [DATABASE.MONGODB]: {
     label: "🍃  MongoDB",
