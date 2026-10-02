@@ -1,9 +1,7 @@
 import { promises as fs } from "fs";
 import { resolve } from "path";
 import type { DATABASE } from "../../config/choices";
-import type { ConfigChoice } from "../../config/config.types";
-import type { VirtualTreeService } from "../../services/virtual-tree.service";
-import { MessageUtil } from "../../utils/message.util";
+import type { StepAction } from "../step.types";
 
 
 export interface OrmDependency {
@@ -39,39 +37,12 @@ export interface OrmMeta {
 
 
 
-/**
- * What an ORM *does*, as data — mirroring Step in step.types.ts: one
- * entry per file written, run in order by the accumulator loop of
- * orm.step.ts. An action is skipped when its `when` returns false, and
- * may return a string: its "next steps" instructions, concatenated
- * into the step's recap.
- *
- * Actions only write into the tree — the pipeline commits it to disk
- * once, after the last step.
- */
-export interface OrmAction {
-  name: string;
-  when?: (config: ConfigChoice) => boolean;
-  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string | void>;
-}
+/** One entry per file written, run in order by orm.step.ts. */
+export interface OrmAction extends StepAction {}
 
 /** Reads one of the CLI's own template assets (dist/templates at runtime). */
 export const readTemplate = (relativePath: string): Promise<string> =>
   fs.readFile(resolve(__dirname, `../../templates/${relativePath}`), "utf-8");
-
-/** Appends KEY="value" to the tree's .env.example unless already present. */
-export const updateEnvExampleIfNeeded = (tree: VirtualTreeService, key: string, value: string): void => {
-  MessageUtil.info(`\nAdding  ${key} to .env.example...`);
-  const current = tree.exists(".env.example") ? tree.read(".env.example") : "";
-  if (current.includes(`${key}=`)) {
-    MessageUtil.info(`${key} already exists in .env.example`);
-    return;
-  }
-  tree.write(".env.example", `${current}\n${key}="${value}"\n`);
-  MessageUtil.success(`.env.example correctly updated with ${key}`);
-};
-
-
 
 export const formatDependency = (dep: OrmDependency): string =>
   `${dep.name}@${dep.version}`;

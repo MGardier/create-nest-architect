@@ -1,6 +1,5 @@
 import type { ARCHITECTURE_TYPE } from "../../config/choices";
-import type { ConfigChoice } from "../../config/config.types";
-import type { VirtualTreeService } from "../../services/virtual-tree.service";
+import type { StepAction } from "../step.types";
 
 
 export interface TemplateMeta {
@@ -8,8 +7,5 @@ export interface TemplateMeta {
   repoUrl: string;
 }
 
-export interface TemplateAction {
-  name: string;
-  when?: (config: ConfigChoice) => boolean;
-  run: (tree: VirtualTreeService, config: ConfigChoice) => Promise<string | void>;
-}
+/** One entry per unit of work, run in order by template.step.ts. */
+export interface TemplateAction extends StepAction {}
