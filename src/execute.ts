@@ -1,6 +1,8 @@
 import { resolve } from "path";
 import { ConfigChoice } from "./config/config.types";
 import { VirtualTreeService } from "./services/virtual-tree.service";
+import { setupDatabase } from "./steps/database.step";
+import { setupExample } from "./steps/example.step";
 import { finalizeStep } from "./steps/finalize.step";
 import { setupModuleSystem } from "./steps/module.step";
 import { setupTemplate } from "./steps/template.step";
@@ -15,8 +17,9 @@ import type { PostStep, Step } from "./steps/step.types";
 const STEPS: Step[] = [
   setupTemplate,
   setupModuleSystem,
+  setupDatabase,
   setupOrm,
-
+  setupExample,
   finalizeStep,
 ];
 

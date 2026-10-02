@@ -1,11 +1,11 @@
-import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
+import { ARCHITECTURE_TYPE, DATABASE } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { ModuleInjectorService } from "../../services/module-injector/module-injector.service";
 import { GlobalPipe, ModuleImport } from "../../services/module-injector/module-injector.types";
 import { MessageUtil } from "../../utils/message.util";
-import { OrmMeta, readTemplate, updateEnvExampleIfNeeded } from "./orm-setup.types";
+import { OrmMeta, readTemplate } from "./orm-setup.types";
 
 // =============================================================================
 //                              META
@@ -167,10 +167,6 @@ export const MongooseSetup = {
             tree.read("src/main.ts"),
             VALIDATION_PIPE
         ));
-    },
-
-    updateEnvExample: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-        updateEnvExampleIfNeeded(tree, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
     },
 
     /** Writes nothing: closes the setup and returns its recap. */

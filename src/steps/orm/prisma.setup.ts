@@ -1,12 +1,12 @@
 import { posix } from "path";
-import { ARCHITECTURE_TYPE, DATABASE, DATABASE_META } from "../../config/choices";
+import { ARCHITECTURE_TYPE, DATABASE } from "../../config/choices";
 import { ConfigChoice } from "../../config/config.types";
 import { TEMPLATE_PATH } from "../../constants/constant";
 import { ModuleInjectorService } from "../../services/module-injector/module-injector.service";
 import { VirtualTreeService } from "../../services/virtual-tree.service";
 import { MessageUtil } from "../../utils/message.util";
 import { importPathFor, readTemplateFor } from "../module/module-system.util";
-import { OrmMeta, updateEnvExampleIfNeeded } from "./orm-setup.types";
+import { OrmMeta } from "./orm-setup.types";
 
 // =============================================================================
 //                              META
@@ -22,6 +22,10 @@ export const PRISMA_META: OrmMeta = {
     // The generated client needs its runtime, and Prisma 7 needs a driver adapter
     { name: "@prisma/client", version: "^7.10.0", scope: "dependencies" },
     { name: "@prisma/adapter-pg", version: "^7.10.0", scope: "dependencies" },
+
+    // What the example's DTO needs to reject a malformed payload
+    { name: "class-validator", version: "^0.15.0", scope: "dependencies" },
+    { name: "class-transformer", version: "^0.5.1", scope: "dependencies" },
 
     // prisma.config.ts loads the .env itself: Prisma 7 no longer does it
     { name: "dotenv", version: "^18.0.0", scope: "devDependencies" },
@@ -135,10 +139,6 @@ export const PrismaSetup = {
     ));
   },
 
-  updateEnvExample: async (tree: VirtualTreeService, config: ConfigChoice): Promise<void> => {
-    updateEnvExampleIfNeeded(tree, "DATABASE_URL", DATABASE_META[config.database].envUrlExample);
-  },
-
   /** Writes nothing: closes the setup and returns its recap. */
   nextSteps: async (_tree: VirtualTreeService, config: ConfigChoice): Promise<string> => {
     MessageUtil.success(`\nPrisma correctly generated and AppModule correctly updated.`);
@@ -146,12 +146,11 @@ export const PrismaSetup = {
     return `
     👉 Before starting don't forget to :
 
-      - Create .env and set DATABASE_URL to your database connection string.
+      - Create .env from .env.example.
       - Add your models to ${schemaDir(config)}/schema.prisma.
-      - Generate the client and the database with :
+      - Apply them, then generate the client in ${generatedClientDir(config)} :
         $ ${config.packager.exec('prisma migrate dev')}
-
-      The client is generated in ${generatedClientDir(config)} and imported by prisma.service.
+        $ ${config.packager.exec('prisma generate')}
     `;
   },
 };

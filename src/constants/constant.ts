@@ -1,4 +1,9 @@
 export const TEMPLATE_PATH = {
+  /** One compose file per database, read as-is: no placeholder, the values come from .env. */
+  database: {
+    postgresql: "database/postgresql.compose.yaml.template",
+  },
+
   /** Jest's configuration, for a CommonJS project. */
   module: {
     cjs: {
@@ -12,6 +17,17 @@ export const TEMPLATE_PATH = {
     service: "prisma/prisma.service.ts.template",
     module: "prisma/prisma.module.ts.template",
     config: "prisma/prisma.config.ts.template",
+
+    /** The POST /users example, written for architecture. */
+    example: {
+      model: "prisma/example/user.model.prisma.template",
+      featured: {
+        dto: "prisma/example/featured/create-user.dto.ts.template",
+        service: "prisma/example/featured/user.service.ts.template",
+        controller: "prisma/example/featured/user.controller.ts.template",
+        module: "prisma/example/featured/user.module.ts.template",
+      },
+    },
   },
 
   mongoose: {

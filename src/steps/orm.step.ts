@@ -23,7 +23,6 @@ const PRISMA_ACTIONS: OrmAction[] = [
   { name: "service", run: PrismaSetup.writeService },
   { name: "app-module", run: PrismaSetup.updateAppModule },
   { name: "prisma-config", run: PrismaSetup.writePrismaConfig },
-  { name: "env-example", run: PrismaSetup.updateEnvExample },
   { name: "next-steps", run: PrismaSetup.nextSteps },
 ];
 
@@ -36,7 +35,6 @@ const MONGOOSE_ACTIONS: OrmAction[] = [
   { name: "example", run: MongooseSetup.writeExample },
   { name: "app-module", run: MongooseSetup.updateAppModule },
   { name: "main", run: MongooseSetup.updateMain },
-  { name: "env-example", run: MongooseSetup.updateEnvExample },
   { name: "next-steps", run: MongooseSetup.nextSteps },
 ];
 

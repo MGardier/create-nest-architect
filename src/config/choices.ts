@@ -35,27 +35,38 @@ export enum DATABASE {
  * place. Adding a database = one entry here + its id in the
  * supportedDatabases of the installers that handle it.
  */
+/** One line of the generated .env.example. */
+export interface EnvVariable {
+  key: string;
+  value: string;
+}
+
 export interface DatabaseMeta {
   /** Prompt display */
   label: string;
 
-  /** What the installer writes in .env.example */
-  envUrlExample: string;
-
-  /** For the future docker-compose */
-  dockerImage?: string;
+  /** Collected by finalize.step into .env.example, and read by compose.yaml. */
+  envVariables: EnvVariable[];
 }
 
 export const DATABASE_META: Record<DATABASE, DatabaseMeta> = {
   [DATABASE.POSTGRESQL]: {
     label: "🐘  PostgreSQL",
-    envUrlExample: "postgresql://user:password@localhost:5432/mydb",
-    dockerImage: "postgres:17",
+    envVariables: [
+      { key: "POSTGRES_USER", value: "app" },
+      { key: "POSTGRES_PASSWORD", value: "app" },
+      { key: "POSTGRES_DB", value: "app" },
+      { key: "POSTGRES_PORT", value: "5432" },
+      { key: "ADMINER_PORT", value: "8080" },
+      { key: "DATABASE_URL", value: "postgresql://app:app@localhost:5432/app" },
+    ],
   },
   [DATABASE.MONGODB]: {
     label: "🍃  MongoDB",
-    envUrlExample: "mongodb://user:password@localhost:27017/mydb",
-    dockerImage: "mongo:8",
+    // No compose yet: only the url the odm needs
+    envVariables: [
+      { key: "DATABASE_URL", value: "mongodb://user:password@localhost:27017/mydb" },
+    ],
   },
 };
 
